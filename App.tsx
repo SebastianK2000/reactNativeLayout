@@ -1,11 +1,21 @@
 import { ScreenContent } from 'components/ScreenContent';
 import { StatusBar } from 'expo-status-bar';
 
+import { useEffect } from "react";
+import { SplashScreen } from "expo-router";
+
 import './global.css';
 import {Text, View} from "react-native";
 import {Link} from "expo-router";
 
 export default function App() {
+
+    useEffect(() => {
+        setTimeout(() => {
+            SplashScreen.hideAsync();
+        }, 1000); // Możesz dostosować czas
+    }, []);
+
     return (
         <View
             style={{

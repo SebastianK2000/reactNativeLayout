@@ -1,37 +1,68 @@
-import { ScreenContent } from 'components/ScreenContent';
 import { StatusBar } from 'expo-status-bar';
+import { Text, Button, View } from "react-native";
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
 
-import { useEffect } from "react";
-import { SplashScreen } from "expo-router";
+import Explore from "../my-expo-app/app/(root)/(tabs)/explore";
+import Profile from "./app/(root)/(tabs)/profile";
+import SignIn from "./app/sign-in";
+import Register from "./app/register";
+import Properties from "./app/(root)/properties/[id]";
 
-import './global.css';
-import {Text, View} from "react-native";
-import {Link} from "expo-router";
+type RootStackParamList = {
+    Home: undefined;
+    SignIn: undefined;
+    Explore: undefined;
+    Profile: undefined;
+    Properties: undefined;
+};
 
-export default function App() {
+const Stack = createNativeStackNavigator<RootStackParamList>();
+const Tab = createBottomTabNavigator();
 
-    useEffect(() => {
-        setTimeout(() => {
-            SplashScreen.hideAsync();
-        }, 1000); // Możesz dostosować czas
-    }, []);
+function HomeTabs() {
+    return (
+        <Tab.Navigator>
+            <Tab.Screen name="Explore" component={Explore} />
+            <Tab.Screen name="Profile" component={Profile} />
+            <Tab.Screen name="Properties" component={Properties} />
+            <Tab.Screen name="Sign in" component={SignIn} />
+            <Tab.Screen name="Register" component={Register} />
+        </Tab.Navigator>
+    );
+}
+
+function HomeScreen() {
+    const navigation = useNavigation<NavigationProp<RootStackParamList>>(); // Określamy typ nawigacji
 
     return (
-        <View
-            style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-            }}
-        >
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={{ fontSize: 24, textAlign: 'center' }}>Welcome to ReState</Text>
 
-            <Text className="font-bold text-lg my-10 ">Welcome to ReState</Text>
-
-            <Link href="/app/sign-in">Sign In</Link>
-            <Link href="/app/(root)/(tabs)/explore">Explore</Link>
-            <Link href="/app/(root)/(tabs)/profile">Profile</Link>
-            <Link href="/app/(root)/properties/[id]">Property</Link>
-
+            <Button
+                title="Go to Sign In"
+                onPress={() => navigation.navigate('SignIn')} // Teraz nawigacja działa poprawnie
+            />
         </View>
+    );
+}
+
+export default function App() {
+    return (
+        <NavigationContainer>
+            <StatusBar style="auto" />
+            <Stack.Navigator>
+                <Stack.Screen
+                    name="Home"
+                    component={HomeTabs} // Przekazujemy HomeTabs jako ekran główny
+                    options={{
+                        headerTitle: () => <Text style={{ fontSize: 24, textAlign: 'center' }}>Planner Hub</Text>,
+                    }}
+                />
+                <Stack.Screen name="SignIn" component={SignIn} />
+            </Stack.Navigator>
+        </NavigationContainer>
     );
 }

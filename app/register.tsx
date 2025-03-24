@@ -12,64 +12,104 @@ import {
 
 import icons from "../constants/icons";
 
-const SignIn = () => {
-    const [text, setText] = useState("");
+const Register = () => {
+    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
+    const [number, setNumber] = useState('');
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+    const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
+
 
     return (
 
         <SafeAreaView style={styles.safeContainer}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.innerContainer}>
-                    <Text style={styles.signInText}>Sign in</Text>
+                    <Text style={styles.signInText}>Register</Text>
 
                     <Text style={styles.infoText}>
-                        If you don’t have an account register {"\n"}
-                        <Text style={styles.registerText} onPress={() => console.log("Navigate to Register")}>Register
-                            here!</Text>
+                        If you already have an account register {"\n"}
+                        <Text style={styles.registerText} onPress={() => console.log("Navigate to Register")}>Login here !</Text>
                     </Text>
 
                     <SafeAreaProvider>
                         <SafeAreaView style={styles.formContainer}>
                             <View style={styles.inputContainer}>
+                                <Text style={styles.label}>Email</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Enter Email"
+                                    onChangeText={setEmail}
+                                    value={email}
+                                />
+                            </View>
+
+                            <View style={styles.inputContainer}>
                                 <Text style={styles.label}>Username</Text>
                                 <TextInput
                                     style={styles.input}
-                                    placeholder="Enter your username"
-                                    onChangeText={setText}
-                                    value={text}
+                                    placeholder="Create User name"
+                                    onChangeText={setUsername}
+                                    value={username}
+                                />
+                            </View>
+
+                            <View style={styles.inputContainer}>
+                                <Text style={styles.label}>Phone</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Contact number"
+                                    onChangeText={setNumber}
+                                    value={number}
                                 />
                             </View>
 
                             <View style={styles.inputContainer}>
                                 <Text style={styles.label}>Password</Text>
-                                <View style={styles.passwordWrapper}>
-                                    <TextInput
-                                        style={styles.input}
-                                        placeholder="Enter your password"
-                                        secureTextEntry={!isPasswordVisible}
-                                        onChangeText={setPassword}
-                                        value={password}
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Password"
+                                    secureTextEntry={!isPasswordVisible}
+                                    onChangeText={setPassword}
+                                    value={password}
+                                />
+                                <TouchableOpacity
+                                    onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+                                    style={styles.eyeButton}
+                                >
+                                    <Image
+                                        source={isPasswordVisible ? icons.eye : icons.eye}
+                                        style={styles.eyeIcon}
                                     />
-                                    <TouchableOpacity
-                                        onPress={() => setIsPasswordVisible(!isPasswordVisible)}
-                                        style={styles.eyeButton}
-                                    >
-                                        <Image source={isPasswordVisible ? icons.eye : icons.eye}
-                                               style={styles.eyeIcon} />
-                                    </TouchableOpacity>
-                                </View>
+                                </TouchableOpacity>
                             </View>
 
-                            <TouchableOpacity onPress={() => console.log("Forgot Password")}>
-                                <Text style={styles.forgotPasswordText}>Forgot password?</Text>
-                            </TouchableOpacity>
+                            <View style={styles.inputContainer}>
+                                <Text style={styles.label}>Confirm Password</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Confirm Password"
+                                    secureTextEntry={!isConfirmPasswordVisible}
+                                    onChangeText={setConfirmPassword}
+                                    value={confirmPassword}
+                                />
+                                <TouchableOpacity
+                                    onPress={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}
+                                    style={styles.eyeButton}
+                                >
+                                    <Image
+                                        source={isConfirmPasswordVisible ? icons.eye : icons.eye}
+                                        style={styles.eyeIcon}
+                                    />
+                                </TouchableOpacity>
+                            </View>
                         </SafeAreaView>
                     </SafeAreaProvider>
 
                     <TouchableOpacity style={styles.loginButton} onPress={() => console.log("Login Pressed")}>
-                        <Text style={styles.loginButtonText}>Login</Text>
+                        <Text style={styles.loginButtonText}>Register</Text>
                     </TouchableOpacity>
 
                     <Text style={styles.socialLoginText}>
@@ -141,7 +181,7 @@ const styles = StyleSheet.create({
         fontFamily: "Rubik",
         color: "#374151",
         fontWeight: "bold",
-        marginBottom: 5,
+        marginBottom: 10,
     },
     infoText: {
         fontSize: 18,
@@ -187,7 +227,7 @@ const styles = StyleSheet.create({
     googleButton: {
         backgroundColor: "#ffffff",
         shadowColor: "#d1d5db",
-        shadowOffset: {width: 0, height: 2},
+        shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.3,
         shadowRadius: 3,
         elevation: 4,
@@ -212,26 +252,6 @@ const styles = StyleSheet.create({
         color: "#1f2937",
         marginLeft: 8,
     },
-    forgotPasswordText: {
-        color: "#2563eb",
-        textAlign: "right",
-        marginBottom: 16,
-    },
-    loginButton: {
-        backgroundColor: "#2563eb",
-        paddingVertical: 12,
-        borderRadius: 8,
-        alignItems: "center",
-    },
-    loginButtonText: {
-        color: "#fff",
-        fontSize: 18,
-        fontWeight: "bold",
-    },
-    passwordWrapper: {
-        position: 'relative',
-        width: '100%',
-    },
     eyeButton: {
         position: 'absolute',
         right: 12,
@@ -244,9 +264,20 @@ const styles = StyleSheet.create({
         height: 20,
         tintColor: '#6b7280',
         position: 'relative',
-        bottom: 7,
+        top: 5,
     },
-
+    loginButton: {
+        backgroundColor: "#2563eb",
+        paddingVertical: 12,
+        borderRadius: 8,
+        alignItems: "center",
+        marginTop: 10,
+    },
+    loginButtonText: {
+        color: "#fff",
+        fontSize: 18,
+        fontWeight: "bold",
+    },
 });
 
-export default SignIn;
+export default Register;

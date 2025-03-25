@@ -28,7 +28,7 @@ type RootStackParamList = {
     ContactUs: undefined;
     PrivacyPolicy: undefined;
 };
-
+// test
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
 

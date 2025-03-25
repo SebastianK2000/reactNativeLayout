@@ -1,22 +1,32 @@
 import { StatusBar } from 'expo-status-bar';
-import { Text, Button, View } from "react-native";
+import { Text } from "react-native";
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 
-import Explore from "../my-expo-app/app/(root)/(tabs)/explore";
-import Profile from "./app/(root)/(tabs)/profile";
-import SignIn from "./app/sign-in";
-import Register from "./app/register";
-import Properties from "./app/(root)/properties/[id]";
+import Home from "../my-expo-app/app/(root)/(tabs)/home";
+import Trips from "./app/(root)/(tabs)/trips";
+import Booking from "./app/(root)/(tabs)/booking";
+import Expenses from "./app/(root)/(tabs)/expenses";
+import Account from "./app/(root)/(tabs)/account";
+
+import Notifications from "./app/(root)/(tabs)/(account)/notifications";
+import Language from "./app/(root)/(tabs)/(account)/language";
+import ThemeSelection from "./app/(root)/(tabs)/(account)/theme";
+import Faq from "./app/(root)/(tabs)/(account)/FAQ";
+import ContactUs from "./app/(root)/(tabs)/(account)/contactUs";
+import PrivacyPolicy from "./app/(root)/(tabs)/(account)/privacyPolicy";
 
 type RootStackParamList = {
     Home: undefined;
-    SignIn: undefined;
-    Explore: undefined;
-    Profile: undefined;
-    Properties: undefined;
+    Account: undefined;
+    Notifications: undefined;
+    Language: undefined;
+    ThemeSelection: undefined;
+    Faq: undefined;
+    ContactUs: undefined;
+    PrivacyPolicy: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -25,27 +35,52 @@ const Tab = createBottomTabNavigator();
 function HomeTabs() {
     return (
         <Tab.Navigator>
-            <Tab.Screen name="Explore" component={Explore} />
-            <Tab.Screen name="Profile" component={Profile} />
-            <Tab.Screen name="Properties" component={Properties} />
-            <Tab.Screen name="Sign in" component={SignIn} />
-            <Tab.Screen name="Register" component={Register} />
-        </Tab.Navigator>
-    );
-}
-
-function HomeScreen() {
-    const navigation = useNavigation<NavigationProp<RootStackParamList>>(); // Określamy typ nawigacji
-
-    return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={{ fontSize: 24, textAlign: 'center' }}>Welcome to ReState</Text>
-
-            <Button
-                title="Go to Sign In"
-                onPress={() => navigation.navigate('SignIn')} // Teraz nawigacja działa poprawnie
+            <Tab.Screen
+                name="Home"
+                component={Home}
+                options={{
+                    tabBarIcon: ({ color, size }) => (
+                        <Ionicons name="home" size={size} color={color} />
+                    ),
+                }}
             />
-        </View>
+            <Tab.Screen
+                name="Trips"
+                component={Trips}
+                options={{
+                    tabBarIcon: ({ color, size }) => (
+                        <Ionicons name="airplane" size={size} color={color} />
+                    ),
+                }}
+            />
+            <Tab.Screen
+                name="Booking"
+                component={Booking}
+                options={{
+                    tabBarIcon: ({ color, size }) => (
+                        <Ionicons name="book" size={size} color={color} />
+                    ),
+                }}
+            />
+            <Tab.Screen
+                name="Expenses"
+                component={Expenses}
+                options={{
+                    tabBarIcon: ({ color, size }) => (
+                        <Ionicons name="card" size={size} color={color} />
+                    ),
+                }}
+            />
+            <Tab.Screen
+                name="Account"
+                component={Account}
+                options={{
+                    tabBarIcon: ({ color, size }) => (
+                        <Ionicons name="person" size={size} color={color} />
+                    ),
+                }}
+            />
+        </Tab.Navigator>
     );
 }
 
@@ -56,12 +91,18 @@ export default function App() {
             <Stack.Navigator>
                 <Stack.Screen
                     name="Home"
-                    component={HomeTabs} // Przekazujemy HomeTabs jako ekran główny
+                    component={HomeTabs}
                     options={{
                         headerTitle: () => <Text style={{ fontSize: 24, textAlign: 'center' }}>Planner Hub</Text>,
                     }}
                 />
-                <Stack.Screen name="SignIn" component={SignIn} />
+                <Stack.Screen name="Account" component={Account} />
+                <Stack.Screen name="Notifications" component={Notifications} />
+                <Stack.Screen name="Language" component={Language} />
+                <Stack.Screen name="ThemeSelection" component={ThemeSelection} />
+                <Stack.Screen name="Faq" component={Faq} />
+                <Stack.Screen name="ContactUs" component={ContactUs} />
+                <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
             </Stack.Navigator>
         </NavigationContainer>
     );

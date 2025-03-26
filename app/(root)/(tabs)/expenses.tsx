@@ -41,11 +41,11 @@ const Expenses: React.FC = () => {
                 ))
             )}
 
-            <OptionItem label="Add Expense" icon="add" screen="ExpenseForm" />
+            <OptionItem label="Add Expense" icon="add" screen="Expense" />
 
             <TouchableOpacity
                 style={styles.fab}
-                onPress={() => navigation.navigate('ExpenseForm')}
+                onPress={() => navigation.navigate('Expense')}
             >
                 <MaterialIcons name="add" size={24} color="white" />
             </TouchableOpacity>

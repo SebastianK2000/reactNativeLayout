@@ -18,7 +18,8 @@ import FAQ from "./app/(root)/(tabs)/(account)/FAQ";
 import ContactUs from "./app/(root)/(tabs)/(account)/contactUs";
 import PrivacyPolicy from "./app/(root)/(tabs)/(account)/privacyPolicy";
 
-import ExpenseForm from "./app/(root)/(tabs)/(expenses)/expensesForm";
+import Expense from "./app/(root)/(tabs)/(expenses)/expensesForm";
+import BookingForm from "./app/(root)/(tabs)/(booking)/bookingForm";
 
 type RootStackParamList = {
     Home: undefined;
@@ -29,7 +30,8 @@ type RootStackParamList = {
     FAQ: undefined;
     ContactUs: undefined;
     PrivacyPolicy: undefined;
-    ExpenseForm: undefined;
+    Expense: undefined;
+    BookingForm: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -107,7 +109,8 @@ export default function App() {
                 <Stack.Screen name="FAQ" component={FAQ} />
                 <Stack.Screen name="ContactUs" component={ContactUs} />
                 <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
-                <Stack.Screen name="ExpenseForm" component={ExpenseForm} />
+                <Stack.Screen name="Expense" component={Expense} />
+                <Stack.Screen name="BookingForm" component={BookingForm} />
             </Stack.Navigator>
         </NavigationContainer>
     );

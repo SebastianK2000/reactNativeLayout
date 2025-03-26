@@ -17,7 +17,11 @@ const Account: React.FC = () => {
         <ScrollView contentContainerStyle={styles.scrollContainer}>
             <View style={styles.profileContainer}>
                 <View style={styles.avatarWrapper}>
-                    <Image source={{ uri: "https://via.placeholder.com/100" }} style={styles.avatar} />
+                    <Image
+                        source={{ uri: "https://www.w3schools.com/w3images/avatar2.png" }}
+                        style={styles.avatar}
+                        resizeMode="cover"
+                    />
                     <TouchableOpacity style={styles.editButton}>
                         <MaterialIcons name="edit" size={16} color="black" />
                     </TouchableOpacity>
@@ -32,7 +36,7 @@ const Account: React.FC = () => {
                 <OptionItem label="Notifications" icon="notifications" screen="Notifications" />
                 <OptionItem label="Language" icon="language" screen="Language" />
                 <OptionItem label="Theme" icon="palette" screen="ThemeSelection" />
-                <OptionItem label="FAQ" icon="help-outline" screen="Faq" />
+                <OptionItem label="FAQ" icon="help-outline" screen="FAQ" />
                 <OptionItem label="Contact Us" icon="email" screen="ContactUs" />
                 <OptionItem label="Privacy" icon="lock" screen="PrivacyPolicy" />
                 <OptionItem label="Logout" icon="exit-to-app" screen="Logout" />

@@ -36,13 +36,13 @@ const LanguageText = styled.Text`
 const languages = [
     { id: 'en-us', name: 'English (US)', category: 'Suggested' },
     { id: 'en-uk', name: 'English (UK)', category: 'Suggested' },
-    { id: 'zh', name: 'Mandarin', category: 'Others' },
-    { id: 'hi', name: 'Hindi', category: 'Others' },
+    { id: 'pl', name: 'Polish', category: 'Others' },
     { id: 'es', name: 'Spanish', category: 'Others' },
     { id: 'fr', name: 'French', category: 'Others' },
     { id: 'ar', name: 'Arabic', category: 'Others' },
     { id: 'ru', name: 'Russian', category: 'Others' },
     { id: 'id', name: 'Indonesian', category: 'Others' },
+    { id: 'hi', name: 'Hindi', category: 'Others' },
     { id: 'vi', name: 'Vietnamese', category: 'Others' }
 ];
 

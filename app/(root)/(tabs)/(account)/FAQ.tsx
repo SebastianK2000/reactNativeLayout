@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 
-const Faq = () => {
+const FAQ = () => {
     return (
         <ScrollView contentContainerStyle={styles.container}>
             <View style={styles.card}>
@@ -83,4 +83,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default Faq;
+export default FAQ;

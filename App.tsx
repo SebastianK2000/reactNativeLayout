@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { Text } from "react-native";
+import { Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -14,9 +14,11 @@ import Account from "./app/(root)/(tabs)/account";
 import Notifications from "./app/(root)/(tabs)/(account)/notifications";
 import Language from "./app/(root)/(tabs)/(account)/language";
 import ThemeSelection from "./app/(root)/(tabs)/(account)/theme";
-import Faq from "./app/(root)/(tabs)/(account)/FAQ";
+import FAQ from "./app/(root)/(tabs)/(account)/FAQ";
 import ContactUs from "./app/(root)/(tabs)/(account)/contactUs";
 import PrivacyPolicy from "./app/(root)/(tabs)/(account)/privacyPolicy";
+
+import ExpenseForm from "./app/(root)/(tabs)/(expenses)/expensesForm";
 
 type RootStackParamList = {
     Home: undefined;
@@ -24,11 +26,12 @@ type RootStackParamList = {
     Notifications: undefined;
     Language: undefined;
     ThemeSelection: undefined;
-    Faq: undefined;
+    FAQ: undefined;
     ContactUs: undefined;
     PrivacyPolicy: undefined;
+    ExpenseForm: undefined;
 };
-// test
+
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
 
@@ -85,6 +88,8 @@ function HomeTabs() {
 }
 
 export default function App() {
+
+    // @ts-ignore
     return (
         <NavigationContainer>
             <StatusBar style="auto" />
@@ -100,9 +105,10 @@ export default function App() {
                 <Stack.Screen name="Notifications" component={Notifications} />
                 <Stack.Screen name="Language" component={Language} />
                 <Stack.Screen name="ThemeSelection" component={ThemeSelection} />
-                <Stack.Screen name="Faq" component={Faq} />
+                <Stack.Screen name="FAQ" component={FAQ} />
                 <Stack.Screen name="ContactUs" component={ContactUs} />
                 <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
+                <Stack.Screen name="ExpenseForm" component={ExpenseForm} />
             </Stack.Navigator>
         </NavigationContainer>
     );

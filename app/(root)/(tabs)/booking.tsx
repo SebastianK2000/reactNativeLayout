@@ -7,8 +7,8 @@ const Booking = () => {
     return (
         <View style={styles.container}>
             <Text style={styles.header}>Booking</Text>
-            <BookingForm />
-            <BookingList />
+                <BookingList />
+                <BookingForm />
         </View>
     );
 };

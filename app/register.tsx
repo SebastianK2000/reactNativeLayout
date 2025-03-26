@@ -116,7 +116,6 @@ const Register = () => {
                         or continue with
                     </Text>
 
-                    {/*Log in social media section */}
                     <TouchableOpacity style={styles.googleButton}>
                         <View style={styles.googleButtonContent}>
                             <Image

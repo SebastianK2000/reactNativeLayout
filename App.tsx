@@ -89,7 +89,6 @@ function HomeTabs() {
 
 export default function App() {
 
-    // @ts-ignore
     return (
         <NavigationContainer>
             <StatusBar style="auto" />

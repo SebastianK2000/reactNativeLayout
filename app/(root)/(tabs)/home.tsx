@@ -1,42 +1,52 @@
 import React from 'react';
-import { View, Text, FlatList, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import FastImage from 'react-native-fast-image';
+import { Image, View, Text, FlatList, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {SafeAreaView, SafeAreaProvider} from 'react-native-safe-area-context';
 
-// Definiowanie typów dla TypeScript
+import travel1 from '../../../assets/images/travel1.jpg';
+import travel2 from '../../../assets/images/travel2.jpg';
+import travel3 from '../../../assets/images/travel3.jpg';
+import travel4 from '../../../assets/images/travel4.jpg';
+import travel5 from '../../../assets/images/travel5.jpg';
+
 interface HomeProps {
     navigation: NativeStackNavigationProp<any>;
 }
 
 const Home: React.FC<HomeProps> = ({ navigation }) => {
     const upcomingTrips = [
-        { id: '1', name: 'Wypad w góry', date: '2025-07-15', image: 'https://source.unsplash.com/400x300/?mountains' },
-        { id: '2', name: 'Wakacje nad morzem', date: '2025-08-01', image: 'https://source.unsplash.com/400x300/?beach' },
+        { id: '1', name: 'A trip to the mountains', date: '2025-07-15', image: travel4 },
+        { id: '2', name: 'Vacations by the Sea', date: '2025-08-01', image: travel5},
     ];
 
     const inspirations = [
-        { id: '1', name: 'Malediwy', image: 'https://unsplash.com/photos/a-person-standing-on-top-of-a-large-rock-eOWabmCNEdg' },
-        { id: '2', name: 'Santorini', image: 'https://unsplash.com/photos/a-person-standing-on-top-of-a-large-rock-eOWabmCNEdg' },
-        { id: '3', name: 'Nowy Jork', image: 'https://unsplash.com/photos/a-person-standing-on-top-of-a-large-rock-eOWabmCNEdg' },
+        { id: '1', name: 'Maldives', image: travel1 },
+        { id: '2', name: 'Santorini', image: travel2 },
+        { id: '3', name: 'New Jork', image: travel3 },
     ];
 
     return (
         <SafeAreaProvider>
             <SafeAreaView style={styles.container}>
                 <ScrollView>
-                    <Text style={styles.header}>🌍 Travel Planner</Text>
+                    <Text style={styles.header}>🌍 Plan your vacation</Text>
 
                     <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('Trips')}>
-                        <Text style={styles.addButtonText}>+ Dodaj podróż</Text>
+                        <Text style={styles.addButtonText}>+ Add Trips</Text>
                     </TouchableOpacity>
 
-                    <Text style={styles.sectionTitle}>✈️ Nadchodzące podróże</Text>
+                    <Text style={styles.sectionTitle}>✈️ Upcoming trips</Text>
                     <FlatList
+                        horizontal
                         data={upcomingTrips}
                         keyExtractor={(item) => item.id}
                         renderItem={({ item }) => (
                             <View style={styles.tripCard}>
+                                <Image
+                                    source={item.image}
+                                    style={styles.tripImage}
+                                    resizeMode="cover"
+                                />
                                 <View style={styles.tripInfo}>
                                     <Text style={styles.tripName}>{item.name}</Text>
                                     <Text style={styles.tripDate}>{item.date}</Text>
@@ -48,17 +58,18 @@ const Home: React.FC<HomeProps> = ({ navigation }) => {
                     />
 
 
-                    <Text style={styles.sectionTitle}>🔥 Inspiracje</Text>
+
+                    <Text style={styles.sectionTitle}>🔥 Inspiration</Text>
                     <FlatList
                         horizontal
                         data={inspirations}
                         keyExtractor={(item) => item.id}
                         renderItem={({ item }) => (
                             <View style={styles.inspirationCard}>
-                                <FastImage
-                                    source={{ uri: item.image }}
+                                <Image
+                                    source={item.image}
                                     style={styles.inspirationImage}
-                                    resizeMode={FastImage.resizeMode.contain}
+                                    resizeMode="contain"
                                 />
                                 <Text style={styles.inspirationText}>{item.name}</Text>
                             </View>
@@ -66,11 +77,11 @@ const Home: React.FC<HomeProps> = ({ navigation }) => {
                         showsHorizontalScrollIndicator={false}
                     />
 
-                    <Text style={styles.sectionTitle}>🔔 Powiadomienia</Text>
+                    <Text style={styles.sectionTitle}>🔔 Notifications</Text>
                     <View style={styles.notifications}>
-                        <Text style={styles.notificationItem}>🛫 Twój lot do Grecji za 3 dni!</Text>
-                        <Text style={styles.notificationItem}>🏨 Pamiętaj o potwierdzeniu rezerwacji hotelu!</Text>
-                        <Text style={styles.notificationItem}>📅 Sprawdź pogodę przed podróżą!</Text>
+                        <Text style={styles.notificationItem}>🛫 Your flight to Greece in 3 days!</Text>
+                        <Text style={styles.notificationItem}>🏨 Remember to confirm your hotel reservation!</Text>
+                        <Text style={styles.notificationItem}>📅 Check the weather before you travel!</Text>
                     </View>
                 </ScrollView>
             </SafeAreaView>
@@ -93,7 +104,7 @@ const styles = StyleSheet.create({
         color: '#333',
     },
     addButton: {
-        backgroundColor: '#ff7f50',
+        backgroundColor: '#2563eb',
         paddingVertical: 12,
         borderRadius: 10,
         alignItems: 'center',

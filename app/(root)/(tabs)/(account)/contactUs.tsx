@@ -1,86 +1,5 @@
 import React, { useState } from 'react';
-import { ScrollView } from 'react-native';
-import styled from 'styled-components/native';
-
-const Container = styled.SafeAreaView`
-    flex: 1;
-    background-color: #f9f9f9;
-    padding: 20px;
-`;
-
-const Description = styled.Text`
-    font-size: 16px;
-    color: #666;
-    text-align: center;
-    margin-bottom: 40px;
-    line-height: 1.5;
-    margin-top: 40px;
-`;
-
-const Form = styled.View`
-    width: 100%;
-    background-color: #fff;
-    border-radius: 16px;
-    padding: 50px;
-    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
-`;
-
-const Input = styled.TextInput`
-    padding: 16px;
-    margin-bottom: 16px;
-    border: 1px solid #ddd;
-    border-radius: 12px;
-    font-size: 16px;
-    color: #333;
-    background-color: #f9f9f9;
-    shadow-color: rgba(0, 0, 0, 0.1);
-    shadow-offset: 0 2px;
-    shadow-radius: 5px;
-    shadow-opacity: 0.2;
-`;
-
-const Textarea = styled.TextInput`
-    padding: 16px;
-    margin-bottom: 16px;
-    border: 1px solid #ddd;
-    border-radius: 12px;
-    font-size: 16px;
-    color: #333;
-    background-color: #f9f9f9;
-    min-height: 150px;
-    text-align-vertical: top;
-    multiline: true;
-    shadow-color: rgba(0, 0, 0, 0.1);
-    shadow-offset: 0 2px;
-    shadow-radius: 5px;
-    shadow-opacity: 0.2;
-`;
-
-const SubmitButton = styled.TouchableOpacity`
-    padding: 16px;
-    background-color: #0066ff;
-    border-radius: 12px;
-    justify-content: center;
-    align-items: center;
-    margin-top: 24px;
-    elevation: 5;
-`;
-
-const SubmitButtonText = styled.Text`
-    color: #fff;
-    font-size: 18px;
-    font-weight: 600;
-`;
-
-const Title = styled.Text`
-    font-size: 17px;
-    font-weight: 500;
-    color: #1c1c1e;
-    text-align: center;
-    margin-bottom: 40px;
-    margin-top: 40px;
-    padding: 20px;
-`;
+import { ScrollView, SafeAreaView, TextInput, TouchableOpacity, Text, StyleSheet } from 'react-native';
 
 const ContactUs = () => {
     const [formData, setFormData] = useState({
@@ -101,37 +20,118 @@ const ContactUs = () => {
     };
 
     return (
-        <Container>
-            <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }}>
-                <Title>We would love to hear from you! Fill out the form below, and we'll get back to you as soon as possible.</Title>
-                <Form>
-                    <Input
+        <SafeAreaView style={styles.container}>
+            <ScrollView contentContainerStyle={styles.scrollContainer}>
+                <Text style={styles.title}>
+                    We would love to hear from you! Fill out the form below, and we'll get back to you as soon as possible.
+                </Text>
+                <SafeAreaView style={styles.form}>
+                    <TextInput
+                        style={styles.input}
                         value={formData.name}
                         onChangeText={(text) => handleChange('name', text)}
                         placeholder="Your Name"
                         placeholderTextColor="#aaa"
                     />
-                    <Input
+                    <TextInput
+                        style={styles.input}
                         value={formData.email}
                         onChangeText={(text) => handleChange('email', text)}
                         placeholder="Your Email"
                         placeholderTextColor="#aaa"
                         keyboardType="email-address"
                     />
-                    <Textarea
+                    <TextInput
+                        style={styles.textarea}
                         value={formData.message}
                         onChangeText={(text) => handleChange('message', text)}
                         placeholder="Your Message"
                         placeholderTextColor="#aaa"
                         multiline
                     />
-                    <SubmitButton onPress={handleSubmit}>
-                        <SubmitButtonText>Send Message</SubmitButtonText>
-                    </SubmitButton>
-                </Form>
+                    <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+                        <Text style={styles.submitButtonText}>Send Message</Text>
+                    </TouchableOpacity>
+                </SafeAreaView>
             </ScrollView>
-        </Container>
+        </SafeAreaView>
     );
 };
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#f9f9f9',
+        padding: 20,
+    },
+    scrollContainer: {
+        flexGrow: 1,
+        paddingBottom: 40,
+    },
+    title: {
+        fontSize: 17,
+        fontWeight: '500',
+        color: '#1c1c1e',
+        textAlign: 'center',
+        marginBottom: 40,
+        marginTop: 40,
+        padding: 20,
+    },
+    form: {
+        width: '100%',
+        backgroundColor: '#fff',
+        borderRadius: 16,
+        padding: 50,
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: 5,
+        shadowOpacity: 0.1,
+    },
+    input: {
+        padding: 16,
+        marginBottom: 16,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 12,
+        fontSize: 16,
+        color: '#333',
+        backgroundColor: '#f9f9f9',
+        shadowColor: 'rgba(0, 0, 0, 0.1)',
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: 5,
+        shadowOpacity: 0.2,
+    },
+    textarea: {
+        padding: 16,
+        marginBottom: 16,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 12,
+        fontSize: 16,
+        color: '#333',
+        backgroundColor: '#f9f9f9',
+        minHeight: 150,
+        textAlignVertical: 'top',
+        shadowColor: 'rgba(0, 0, 0, 0.1)',
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: 5,
+        shadowOpacity: 0.2,
+    },
+    submitButton: {
+        padding: 16,
+        backgroundColor: '#0066ff',
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 24,
+        elevation: 5,
+    },
+    submitButtonText: {
+        color: '#fff',
+        fontSize: 18,
+        fontWeight: '600',
+    },
+});
 
 export default ContactUs;

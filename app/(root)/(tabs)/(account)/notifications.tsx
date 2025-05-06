@@ -1,38 +1,5 @@
 import React, { useState } from 'react';
-import styled from 'styled-components/native';
-import { ScrollView, Switch, View } from 'react-native';
-
-const Container = styled.SafeAreaView`
-    flex: 1;
-    background-color: #ffffff;
-`;
-
-const SectionTitle = styled.Text`
-    font-size: 18px;
-    font-weight: bold;
-    color: #1c1c1e;
-    margin-top: 20px;
-    margin-bottom: 10px;
-    padding-left: 15px;
-`;
-
-const Divider = styled.View`
-    height: 1px;
-    background-color: #d1d1d6;
-    margin-vertical: 10px;
-`;
-
-const NotificationItem = styled.View`
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 20px;
-`;
-
-const NotificationText = styled.Text`
-    font-size: 18px;
-    color: #1c1c1e;
-`;
+import { ScrollView, Switch, View, Text, StyleSheet } from 'react-native';
 
 const notifications = [
     { id: 'general', name: 'General Notification', category: 'Common' },
@@ -57,28 +24,59 @@ const NotificationsScreen = () => {
     const categories = [...new Set(notifications.map(n => n.category))];
 
     return (
-        <Container>
+        <View style={styles.container}>
             <ScrollView showsVerticalScrollIndicator={false}>
                 {categories.map((category) => (
                     <View key={category}>
-                        <SectionTitle>{category}</SectionTitle>
+                        <Text style={styles.sectionTitle}>{category}</Text>
                         {notifications.filter(n => n.category === category).map((item) => (
-                            <NotificationItem key={item.id}>
-                                <NotificationText>{item.name}</NotificationText>
+                            <View key={item.id} style={styles.notificationItem}>
+                                <Text style={styles.notificationText}>{item.name}</Text>
                                 <Switch
                                     trackColor={{ false: '#D1D1D6', true: '#2563EB' }}
                                     thumbColor={enabled[item.id] ? '#ffffff' : '#f4f3f4'}
                                     onValueChange={() => toggleSwitch(item.id)}
                                     value={!!enabled[item.id]}
                                 />
-                            </NotificationItem>
+                            </View>
                         ))}
-                        <Divider />
+                        <View style={styles.divider} />
                     </View>
                 ))}
             </ScrollView>
-        </Container>
+        </View>
     );
 };
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#ffffff',
+    },
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#1c1c1e',
+        marginTop: 20,
+        marginBottom: 10,
+        paddingLeft: 15,
+    },
+    divider: {
+        height: 1,
+        backgroundColor: '#d1d1d6',
+        marginVertical: 10,
+    },
+    notificationItem: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 15,
+        paddingHorizontal: 20,
+    },
+    notificationText: {
+        fontSize: 18,
+        color: '#1c1c1e',
+    },
+});
 
 export default NotificationsScreen;

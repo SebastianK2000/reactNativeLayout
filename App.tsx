@@ -5,7 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 
-import Home from "../my-expo-app/app/(root)/(tabs)/home";
+import Home from "./app/(root)/(tabs)/home";
 import Trips from "./app/(root)/(tabs)/trips";
 import Booking from "./app/(root)/(tabs)/booking";
 import Expenses from "./app/(root)/(tabs)/expenses";

@@ -53,7 +53,7 @@ const Home: React.FC<HomeProps> = ({ navigation }) => {
                                 </View>
                             </View>
                         )}
-                        ListEmptyComponent={<Text style={{ textAlign: 'center', padding: 20 }}>Brak nadchodzących podróży</Text>}
+                        ListEmptyComponent={<Text style={{ textAlign: 'center', padding: 20 }}>You don't have any travels</Text>}
                         showsHorizontalScrollIndicator={false}
                     />
 

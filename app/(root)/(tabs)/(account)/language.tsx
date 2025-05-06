@@ -1,37 +1,6 @@
 import React, { useState } from 'react';
-import styled from 'styled-components/native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-
-const Container = styled.View`
-    flex: 1;
-    background-color: #ffffff;
-    padding: 20px;
-`;
-
-const SectionTitle = styled.Text`
-    font-size: 18px;
-    font-weight: bold;
-    color: #1c1c1e;
-    margin-top: 20px;
-    margin-bottom: 10px;
-`;
-
-const Divider = styled.View`
-    height: 1px;
-    background-color: #d1d1d6;
-`;
-
-const LanguageItem = styled.TouchableOpacity`
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 10px;
-`;
-
-const LanguageText = styled.Text`
-    font-size: 18px;
-    color: #1c1c1e;
-`;
 
 const languages = [
     { id: 'en-us', name: 'English (US)', category: 'Suggested' },
@@ -52,24 +21,62 @@ const LanguageSelector = () => {
     const others = languages.filter(lang => lang.category === 'Others');
 
     return (
-        <Container>
-            <SectionTitle>Suggested</SectionTitle>
+        <View style={styles.container}>
+            <Text style={styles.sectionTitle}>Suggested</Text>
             {suggested.map((item) => (
-                <LanguageItem key={item.id} onPress={() => setSelectedLanguage(item.id)}>
-                    <LanguageText>{item.name}</LanguageText>
-                    <Ionicons name={selectedLanguage === item.id ? 'radio-button-on' : 'radio-button-off'} size={24} color={selectedLanguage === item.id ? '#2563EB' : '#D1D1D6'} />
-                </LanguageItem>
+                <TouchableOpacity key={item.id} style={styles.languageItem} onPress={() => setSelectedLanguage(item.id)}>
+                    <Text style={styles.languageText}>{item.name}</Text>
+                    <Ionicons
+                        name={selectedLanguage === item.id ? 'radio-button-on' : 'radio-button-off'}
+                        size={24}
+                        color={selectedLanguage === item.id ? '#2563EB' : '#D1D1D6'}
+                    />
+                </TouchableOpacity>
             ))}
-            <Divider />
-            <SectionTitle>Others</SectionTitle>
+            <View style={styles.divider} />
+            <Text style={styles.sectionTitle}>Others</Text>
             {others.map((item) => (
-                <LanguageItem key={item.id} onPress={() => setSelectedLanguage(item.id)}>
-                    <LanguageText>{item.name}</LanguageText>
-                    <Ionicons name={selectedLanguage === item.id ? 'radio-button-on' : 'radio-button-off'} size={24} color={selectedLanguage === item.id ? '#2563EB' : '#D1D1D6'} />
-                </LanguageItem>
+                <TouchableOpacity key={item.id} style={styles.languageItem} onPress={() => setSelectedLanguage(item.id)}>
+                    <Text style={styles.languageText}>{item.name}</Text>
+                    <Ionicons
+                        name={selectedLanguage === item.id ? 'radio-button-on' : 'radio-button-off'}
+                        size={24}
+                        color={selectedLanguage === item.id ? '#2563EB' : '#D1D1D6'}
+                    />
+                </TouchableOpacity>
             ))}
-        </Container>
+        </View>
     );
 };
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#ffffff',
+        padding: 20,
+    },
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#1c1c1e',
+        marginTop: 20,
+        marginBottom: 10,
+    },
+    divider: {
+        height: 1,
+        backgroundColor: '#d1d1d6',
+    },
+    languageItem: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 15,
+        paddingHorizontal: 10,
+    },
+    languageText: {
+        fontSize: 18,
+        color: '#1c1c1e',
+    },
+});
 
 export default LanguageSelector;

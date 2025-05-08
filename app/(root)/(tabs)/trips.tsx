@@ -45,6 +45,9 @@ const Trips: React.FC = () => {
             <TouchableOpacity style={styles.fab} onPress={handleCreateTeam}>
                 <MaterialIcons name="add" size={24} color="white" />
             </TouchableOpacity>
+
+            <OptionItem label="List Trips" icon="info" screen="TripList" />
+
         </View>
     );
 };

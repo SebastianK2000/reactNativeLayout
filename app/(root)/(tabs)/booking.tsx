@@ -53,6 +53,9 @@ const BookingScreen: React.FC = () => {
             >
                 <MaterialIcons name="add" size={24} color="white" />
             </TouchableOpacity>
+
+            <OptionItem label="Booking List" icon="info" screen="BookingList" />
+
         </View>
     );
 };

@@ -82,6 +82,11 @@ const Home: React.FC<HomeProps> = ({ navigation }) => {
                         <Text style={styles.notificationItem}>🛫 Your flight to Greece in 3 days!</Text>
                         <Text style={styles.notificationItem}>🏨 Remember to confirm your hotel reservation!</Text>
                         <Text style={styles.notificationItem}>📅 Check the weather before you travel!</Text>
+
+                        <TouchableOpacity style={styles.notificationItem} onPress={() => navigation.navigate('TeamList')}>
+                            <Text>🛈 Team List</Text>
+                        </TouchableOpacity>
+
                     </View>
                 </ScrollView>
             </SafeAreaView>

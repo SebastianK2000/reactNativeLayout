@@ -22,6 +22,9 @@ import Expense from "./app/(root)/(tabs)/(expenses)/expensesForm";
 import ExpenseList from "./app/(root)/(tabs)/(expenses)/expensesListScreen";
 import BookingForm from "./app/(root)/(tabs)/(booking)/bookingForm";
 import TripsForm from "./app/(root)/(tabs)/(trips)/tripsForm";
+import TripList from "./app/(root)/(tabs)/(trips)/tripsListScreen";
+import BookingList from "./app/(root)/(tabs)/(booking)/bookingListScreen";
+import TeamList from "./app/(root)/(tabs)/(home)/teamListScreen";
 
 type RootStackParamList = {
     Home: undefined;
@@ -37,6 +40,9 @@ type RootStackParamList = {
     TripsForm: undefined;
     Trips: undefined;
     ExpenseList: undefined;
+    TripList: undefined;
+    BookingList: undefined;
+    TeamList: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -118,6 +124,9 @@ export default function App() {
                 <Stack.Screen name="BookingForm" component={BookingForm} />
                 <Stack.Screen name="TripsForm" component={TripsForm} />
                 <Stack.Screen name="ExpenseList" component={ExpenseList} />
+                <Stack.Screen name="TripList" component={TripList} />
+                <Stack.Screen name="BookingList" component={BookingList} />
+                <Stack.Screen name="TeamList" component={TeamList} />
 
             </Stack.Navigator>
         </NavigationContainer>

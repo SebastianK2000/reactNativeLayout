@@ -2,8 +2,16 @@ import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { TextInput, Button, Text, HelperText, Modal, Provider as PaperProvider, DefaultTheme } from 'react-native-paper';
 import { Picker } from '@react-native-picker/picker';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+type RootStackParamList = {
+  ExpenseList: undefined;
+};
 
 const ExpenseForm = () => {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
     const [visible, setVisible] = useState(false);
     const [title, setTitle] = useState('');
     const [price, setPrice] = useState('');
@@ -20,9 +28,12 @@ const ExpenseForm = () => {
         if (!title || !price || isNaN(parseFloat(price)) || !date) {
             return;
         }
-
+    
         toggleModal();
+    
+        navigation.navigate('ExpenseList');
     };
+    
 
     const theme = {
         ...DefaultTheme,

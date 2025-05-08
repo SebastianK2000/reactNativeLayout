@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Button } from 'react-native-paper';
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -49,6 +50,9 @@ const Expenses: React.FC = () => {
             >
                 <MaterialIcons name="add" size={24} color="white" />
             </TouchableOpacity>
+
+            <OptionItem label="List Expense" icon="info" screen="ExpenseList" />
+
         </View>
     );
 };

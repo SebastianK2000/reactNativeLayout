@@ -18,13 +18,14 @@ import FAQ from "./app/(root)/(tabs)/(account)/FAQ";
 import ContactUs from "./app/(root)/(tabs)/(account)/contactUs";
 import PrivacyPolicy from "./app/(root)/(tabs)/(account)/privacyPolicy";
 
-import Expense from "./app/(root)/(tabs)/(expenses)/expensesForm";
 import ExpenseList from "./app/(root)/(tabs)/(expenses)/expensesListScreen";
-import BookingForm from "./app/(root)/(tabs)/(booking)/bookingForm";
-import TripsForm from "./app/(root)/(tabs)/(trips)/tripsForm";
 import TripList from "./app/(root)/(tabs)/(trips)/tripsListScreen";
 import BookingList from "./app/(root)/(tabs)/(booking)/bookingListScreen";
 import TeamList from "./app/(root)/(tabs)/(home)/teamListScreen";
+import UserList from "./app/(root)/(tabs)/(booking)/userListScreen";
+import AccommodationList from "./app/(root)/(tabs)/(expenses)/AccommodationsListScreen";
+import TeamMemberList from "./app/(root)/(tabs)/(home)/TeamMemberListScreen";
+import TripUserList from "./app/(root)/(tabs)/(trips)/tripUserListScreen";
 
 type RootStackParamList = {
     Home: undefined;
@@ -38,11 +39,15 @@ type RootStackParamList = {
     Expense: undefined;
     BookingForm: undefined;
     TripsForm: undefined;
+    UserList: undefined;
     Trips: undefined;
     ExpenseList: undefined;
     TripList: undefined;
     BookingList: undefined;
     TeamList: undefined;
+    AccommodationList: undefined;
+    TeamMemberList: undefined;
+    TripUserList: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -120,13 +125,14 @@ export default function App() {
                 <Stack.Screen name="FAQ" component={FAQ} />
                 <Stack.Screen name="ContactUs" component={ContactUs} />
                 <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
-                <Stack.Screen name="Expense" component={Expense} />
-                <Stack.Screen name="BookingForm" component={BookingForm} />
-                <Stack.Screen name="TripsForm" component={TripsForm} />
+                <Stack.Screen name="UserList" component={UserList} />
                 <Stack.Screen name="ExpenseList" component={ExpenseList} />
                 <Stack.Screen name="TripList" component={TripList} />
                 <Stack.Screen name="BookingList" component={BookingList} />
                 <Stack.Screen name="TeamList" component={TeamList} />
+                <Stack.Screen name="AccommodationList" component={AccommodationList} />
+                <Stack.Screen name="TeamMemberList" component={TeamMemberList} />
+                <Stack.Screen name="TripUserList" component={TripUserList} />
 
             </Stack.Navigator>
         </NavigationContainer>

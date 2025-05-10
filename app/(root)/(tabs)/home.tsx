@@ -86,6 +86,10 @@ const Home: React.FC<HomeProps> = ({ navigation }) => {
                         <TouchableOpacity style={styles.notificationItem} onPress={() => navigation.navigate('TeamList')}>
                             <Text>🛈 Team List</Text>
                         </TouchableOpacity>
+                        
+                        <TouchableOpacity style={styles.notificationItem} onPress={() => navigation.navigate('TeamMemberList')}>
+                            <Text>🛈 Team Member List</Text>
+                        </TouchableOpacity>
 
                     </View>
                 </ScrollView>

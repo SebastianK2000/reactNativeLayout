@@ -52,6 +52,7 @@ const Expenses: React.FC = () => {
             </TouchableOpacity>
 
             <OptionItem label="List Expense" icon="info" screen="ExpenseList" />
+            <OptionItem label="List Accommodation" icon="info" screen="AccommodationList" />
 
         </View>
     );

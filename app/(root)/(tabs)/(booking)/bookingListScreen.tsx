@@ -1,39 +1,58 @@
 import React, { useEffect, useState } from 'react';
 import { ScrollView, View, Text, StyleSheet, Button } from 'react-native';
-import { getBookings, getUsers } from '../../../../services/api';
+import { getBookings, createBooking, updateBooking, deleteBooking } from '../../../../services/api';
+import BookingForm from './bookingForm';
 
 const BookingListScreen = () => {
-  const [bookings, setBookings] = useState([]);
-  const [users, setUsers] = useState([]);
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [editingBooking, setEditingBooking] = useState<any>(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchBookings = async () => {
       try {
         const bookingData = await getBookings();
-        const userData = await getUsers();
         setBookings(bookingData);
-        setUsers(userData);
       } catch (err) {
         console.error(err);
       }
     };
-    fetchData();
+    fetchBookings();
   }, []);
 
-  const handleDeleteBooking = (id: string) => {
-    setBookings(bookings.filter((item: any) => item.id !== id));
+  const handleDeleteBooking = async (id: string) => {
+    try {
+      await deleteBooking(id);
+      setBookings(bookings.filter((item: any) => item.id !== id));
+    } catch (err) {
+      console.error('Delete error', err);
+    }
   };
 
-  const handleEditBooking = (id: string) => {
-    console.log(`Edit booking with id: ${id}`);
+  const handleEditBooking = (booking: any) => {
+    setEditingBooking(booking);
+    setModalVisible(true);
   };
 
-  const handleDeleteUser = (id: string) => {
-    setUsers(users.filter((item: any) => item.IDuser !== id));
+  const handleFormClose = () => {
+    setEditingBooking(null);
+    setModalVisible(false);
   };
 
-  const handleEditUser = (id: string) => {
-    console.log(`Edit user with id: ${id}`);
+  const handleFormSubmit = async (formData: any) => {
+    try {
+      if (editingBooking && editingBooking.id) {
+        const updated = await updateBooking(editingBooking.id, formData);
+        setBookings(bookings.map(b => (b.id === updated.id ? updated : b)));
+      } else {
+        formData.IDuser = parseInt(formData.IDuser);
+        const newBooking = await createBooking(formData);
+        setBookings([...bookings, newBooking]);
+      }
+      handleFormClose();
+    } catch (err) {
+      console.error('Form submission error:', err);
+    }
   };
 
   const renderBooking = (item: any) => (
@@ -46,97 +65,38 @@ const BookingListScreen = () => {
       <Text style={styles.itemDetail}>🔄 Status: {item.status || 'No status'}</Text>
 
       <View style={styles.buttonContainer}>
-        <Button title="Edit" onPress={() => handleEditBooking(item.id)} />
+        <Button title="Edit" onPress={() => handleEditBooking(item)} />
         <Button title="Delete" onPress={() => handleDeleteBooking(item.id)} />
       </View>
     </View>
   );
 
-  const renderUser = (item: any) => (
-    <View style={styles.itemBox}>
-        <Text style={styles.itemTitle}>User: {(item.FirstName || '') + ' ' + (item.LastName || '')}</Text>
-        <Text style={styles.itemDetail}>👤 First Name: {item.FirstName || 'No First Name'}</Text>
-        <Text style={styles.itemDetail}>👤 Last Name: {item.LastName || 'No Last Name'}</Text>
-        <Text style={styles.itemDetail}>📞 Phone: {item.Phone || 'No Phone'}</Text>
-        <Text style={styles.itemDetail}>📧 Email: {item.Email || 'No E-maila'}</Text>
-        <Text style={styles.itemDetail}>🏠 Address: {item.Address || 'No Address'}</Text>
-        <Text style={styles.itemDetail}>
-        {item.IsActive ? '✅ Active' : '❌ Inactive'}
-        </Text>
-
-      <View style={styles.buttonContainer}>
-        <Button title="Edit" onPress={() => handleEditUser(item.IDuser)} />
-        <Button title="Delete" onPress={() => handleDeleteUser(item.IDuser)} />
-      </View>
-    </View>
-  );
-
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('pl-PL', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
-
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.sectionTitle}>🏨 Bookings</Text>
-      <Button title="Add New Booking" onPress={() => console.log('Add new Booking')} />
+      <Button title="Add New Booking" onPress={() => setModalVisible(true)} />
       {bookings.map((item, index) => (
         <React.Fragment key={index}>{renderBooking(item)}</React.Fragment>
       ))}
-
-      <Text style={styles.sectionTitle}>👤 Users</Text>
-      <Button title="Add New User" onPress={() => console.log('Add new User')} />
-      {users.map((item, index) => (
-        <React.Fragment key={index}>{renderUser(item)}</React.Fragment>
-      ))}
-
+      {modalVisible && (
+        <BookingForm
+          visible={modalVisible}
+          initialData={editingBooking}
+          onClose={handleFormClose}
+          onSubmit={handleFormSubmit}
+        />
+      )}
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    padding: 16,
-  },
-  sectionTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginTop: 20,
-    marginBottom: 10,
-    color: '#333',
-  },
-  itemDetail: {
-    fontSize: 16,
-    color: '#555',
-    marginBottom: 4,
-  },
-  itemBox: {
-    backgroundColor: '#f8f8f8',
-    borderRadius: 8,
-    padding: 14,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  itemTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 10,
-  },
+  container: { flex: 1, backgroundColor: '#fff', padding: 16 },
+  sectionTitle: { fontSize: 22, fontWeight: 'bold', marginTop: 20, marginBottom: 10, color: '#333' },
+  itemBox: { backgroundColor: '#f8f8f8', borderRadius: 8, padding: 14, marginBottom: 12 },
+  itemTitle: { fontSize: 18, fontWeight: 'bold', color: '#333', marginBottom: 8 },
+  itemDetail: { fontSize: 16, color: '#555', marginBottom: 4 },
+  buttonContainer: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 },
 });
 
 export default BookingListScreen;

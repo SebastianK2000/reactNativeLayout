@@ -47,6 +47,7 @@ const Trips: React.FC = () => {
             </TouchableOpacity>
 
             <OptionItem label="List Trips" icon="info" screen="TripList" />
+            <OptionItem label="List Trip User" icon="info" screen="TripUserList" />
 
         </View>
     );

@@ -55,6 +55,7 @@ const BookingScreen: React.FC = () => {
             </TouchableOpacity>
 
             <OptionItem label="Booking List" icon="info" screen="BookingList" />
+            <OptionItem label="User List" icon="info" screen="UserList" />
 
         </View>
     );

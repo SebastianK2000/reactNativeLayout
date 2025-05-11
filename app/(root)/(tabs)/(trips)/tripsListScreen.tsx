@@ -9,6 +9,7 @@ const TripsListScreen = () => {
     startDate: string;
     endDate: string;
     destination: string;
+    createdAt?: string;
   }
 
   const [trips, setTrips] = useState<Trip[]>([]);
@@ -43,36 +44,45 @@ const TripsListScreen = () => {
     setIsFormVisible(false);
   };
 
-  const handleAddOrUpdateTrip = async () => {
-    if (!tripName || !startDate || !endDate || !destination) {
-      Alert.alert('Error', 'Please fill out all fields');
-      return;
-    }
+const handleAddOrUpdateTrip = async () => {
+  if (!tripName || !startDate || !endDate || !destination) {
+    Alert.alert('Error', 'Please fill out all fields');
+    return;
+  }
 
-    const tripPayload = {
-      tripName,
-      startDate: new Date(startDate).toISOString(),
-      endDate: new Date(endDate).toISOString(),
-      destination,
-      IDuser: 1,
-    };
-
-    try {
-      if (editingTrip) {
-        const updated = await updateTrip(editingTrip.id, tripPayload);
-        setTrips(trips.map(t => (t.id === updated.id ? updated : t)));
-        Alert.alert('Zaktualizowano', 'Wyjazd został zaktualizowany.');
-      } else {
-        const created = await createTrip(tripPayload);
-        setTrips([...trips, { ...created, id: created.iDtrip }]);
-        Alert.alert('Dodano', 'Nowy wyjazd został dodany.');
-      }
-      resetForm();
-    } catch (error) {
-      console.error('Błąd zapisu:', error);
-      Alert.alert('Błąd', 'Nie udało się zapisać wyjazdu');
-    }
+  const payload = {
+    IDtrip: editingTrip?.id ?? 0,
+    TripName: tripName,
+    StartDate: new Date(startDate).toISOString(),
+    EndDate: new Date(endDate).toISOString(),
+    Destination: destination,
+    IDuser: 1,
+    CreatedAt: editingTrip?.createdAt || new Date().toISOString(),
+    UpdatedAt: new Date().toISOString(),
   };
+
+  try {
+    if (editingTrip) {
+      const updated = await updateTrip(editingTrip.id, payload);
+
+      if (updated && updated.iDtrip !== undefined) {
+        setTrips(prev =>
+          prev.map(t => (t.id === updated.iDtrip ? { ...updated, id: updated.iDtrip } : t))
+        );
+        Alert.alert('Zaktualizowano', 'Wyjazd został zaktualizowany.');
+      }
+    } else {
+      const created = await createTrip(payload);
+      setTrips(prev => [...prev, { ...created, id: created.iDtrip }]);
+      Alert.alert('Dodano', 'Nowy wyjazd został dodany.');
+    }
+
+    resetForm();
+  } catch (error) {
+    console.error('Błąd zapisu:', error);
+    Alert.alert('Błąd', 'Nie udało się zapisać wyjazdu');
+  }
+};
 
   const handleDeleteTrip = async (id: number) => {
     try {

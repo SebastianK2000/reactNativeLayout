@@ -83,13 +83,12 @@ export const deleteAccommodation = async (id) => {
 
 // ---------- USER ----------
 export const getUsers = async () => {
-  try {
-    const response = await fetch(`${BASE_URL}/User`);
-    return await handleResponse(response);
-  } catch (error) {
-    console.error('Błąd pobierania użytkowników:', error);
-    throw error;
-  }
+  const response = await fetch(`${BASE_URL}/User`);
+  const data = await handleResponse(response);
+  return data.map(item => ({
+    ...item,
+    IDuser: item.iDuser?.toString()
+  }));
 };
 
 export const createUser = async (user) => {
@@ -162,18 +161,18 @@ export const createBooking = async (booking) => {
 };
 
 export const updateBooking = async (id, updatedBooking) => {
-  try {
-    const response = await fetch(`${BASE_URL}/Booking/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updatedBooking),
-    });
-    return await handleResponse(response);
-  } catch (error) {
-    console.error('Błąd aktualizacji rezerwacji:', error);
-    throw error;
-  }
+  const response = await fetch(`${BASE_URL}/Booking/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      IDbooking: id,
+      ...updatedBooking,
+    }),
+  });
+
+  return await handleResponse(response);
 };
+
 
 export const deleteBooking = async (id) => {
   const response = await fetch(`${BASE_URL}/Booking/${id}`, {
@@ -252,7 +251,13 @@ export const deletePayment = async (id) => {
 export const getTeams = async () => {
   try {
     const response = await fetch(`${BASE_URL}/Team`);
-    return await handleResponse(response);
+    const data = await handleResponse(response);
+
+    return data.map(team => ({
+      ...team,
+      IDteam: team.iDteam,
+      creationAt: team.createdAt,
+    }));
   } catch (error) {
     console.error('Błąd pobierania zespołów:', error);
     throw error;
@@ -355,7 +360,7 @@ export const getTrips = async () => {
     const data = await handleResponse(response);
     return data.map(item => ({
       ...item,
-      id: item.iDtrip, // 👈 ZGODNIE z nazwą z backendu
+      id: item.iDtrip,
     }));
   } catch (error) {
     console.error('Błąd pobierania wyjazdów:', error);

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ScrollView, View, Text, StyleSheet, Button } from 'react-native';
 import { getUsers, createUser, updateUser, deleteUser } from '../../../../services/api';
-import UserForm from './userForm'; // upewnij się, że ścieżka jest poprawna
+import UserForm from './userForm';
 
 const UserListScreen = () => {
   interface User {
@@ -70,7 +70,7 @@ const UserListScreen = () => {
   };
 
   const renderUser = (item: User) => (
-    <View style={styles.itemBox} key={item.IDuser}>
+    <View key={item.IDuser} style={styles.itemBox}>
       <Text style={styles.itemTitle}>User: {(item.FirstName || '') + ' ' + (item.LastName || '')}</Text>
       <Text style={styles.itemDetail}>👤 First Name: {item.FirstName || 'No First Name'}</Text>
       <Text style={styles.itemDetail}>👤 Last Name: {item.LastName || 'No Last Name'}</Text>

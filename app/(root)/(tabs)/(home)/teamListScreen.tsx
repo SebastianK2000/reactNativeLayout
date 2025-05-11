@@ -38,32 +38,35 @@ const TeamListScreen = () => {
   };
 
   const handleAddOrUpdateTeam = async () => {
-    if (!teamName || !creationAt) {
-      Alert.alert('Błąd', 'Uzupełnij wszystkie pola');
-      return;
-    }
+  if (!teamName || !creationAt) {
+    Alert.alert('Błąd', 'Uzupełnij wszystkie pola');
+    return;
+  }
 
-    const formData = {
-      teamName,
-      creationAt: new Date(creationAt).toISOString(),
-    };
-
-    try {
-      if (editingTeam) {
-        const updated = await updateTeam(editingTeam.IDteam, formData);
-        setTeams(teams.map(t => (t.IDteam === updated.IDteam ? updated : t)));
-        Alert.alert('Zaktualizowano', 'Drużyna została zaktualizowana.');
-      } else {
-        const created = await createTeam(formData);
-        setTeams([...teams, created]);
-        Alert.alert('Dodano', 'Nowa drużyna została dodana.');
-      }
-      resetForm();
-    } catch (error) {
-      console.error('Błąd zapisu drużyny:', error);
-      Alert.alert('Błąd', 'Nie udało się zapisać drużyny.');
-    }
+  const payload = {
+    IDteam: editingTeam?.IDteam ?? 0,
+    TeamName: teamName,
+    CreatedAt: editingTeam?.creationAt || new Date().toISOString(),
+    UpdatedAt: new Date().toISOString(),
   };
+
+  try {
+    if (editingTeam) {
+      const updated = await updateTeam(editingTeam.IDteam, payload);
+      setTeams(teams.map(t => (t.IDteam === updated.iDteam ? { ...updated, IDteam: updated.iDteam } : t)));
+      Alert.alert('Zaktualizowano', 'Drużyna została zaktualizowana.');
+    } else {
+      const created = await createTeam(payload);
+      setTeams([...teams, { ...created, IDteam: created.iDteam }]);
+      Alert.alert('Dodano', 'Nowa drużyna została dodana.');
+    }
+    resetForm();
+  } catch (error) {
+    console.error('Błąd zapisu drużyny:', error);
+    Alert.alert('Błąd', 'Nie udało się zapisać drużyny.');
+  }
+};
+
 
   const handleDeleteTeam = async (id: string) => {
     try {
@@ -78,7 +81,7 @@ const TeamListScreen = () => {
 
   const handleEditTeam = (team: Team) => {
     setTeamName(team.teamName);
-    setCreationAt(team.creationAt.split('T')[0]);
+    setCreationAt(team.creationAt ? team.creationAt.split('T')[0] : today);
     setEditingTeam(team);
     setIsFormVisible(true);
   };

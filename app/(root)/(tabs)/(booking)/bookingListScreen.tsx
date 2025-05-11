@@ -46,21 +46,32 @@ const BookingListScreen = () => {
     setModalVisible(false);
   };
 
-  const handleFormSubmit = async (formData: any) => {
-    try {
-      if (editingBooking && editingBooking.id) {
-        const updated = await updateBooking(editingBooking.id, formData);
-        setBookings(bookings.map(b => (b.id === updated.id ? updated : b)));
-      } else {
-        formData.IDuser = parseInt(formData.IDuser);
-        const newBooking = await createBooking(formData);
-        setBookings([...bookings, newBooking]);
-      }
-      handleFormClose();
-    } catch (err) {
-      console.error('Form submission error:', err);
+const handleFormSubmit = async (formData: any) => {
+  try {
+    const payload = {
+      IDbooking: editingBooking.id,
+      IDuser: parseInt(formData.IDuser, 10),
+      IDaccommodation: parseInt(formData.IDaccommodation, 10),
+      BookingDate: formData.bookingDate,
+      CheckInDate: formData.bookingDate,
+      CheckOutDate: formData.bookingDate,
+      TotalPrice: parseFloat(formData.totalPrice),
+      Status: formData.status || 'New',
+    };
+
+    if (editingBooking && editingBooking.id) {
+      const updated = await updateBooking(editingBooking.id, payload);
+      setBookings(bookings.map(b => (b.id === updated.iDbooking ? { ...updated, id: updated.iDbooking } : b)));
+    } else {
+      const newBooking = await createBooking(payload);
+      setBookings([...bookings, { ...newBooking, id: newBooking.iDbooking }]);
     }
-  };
+
+    handleFormClose();
+  } catch (err) {
+    console.error('Form submission error:', err);
+  }
+};
 
   const renderBooking = (item: any) => (
     <View style={styles.itemBox} key={item.id}>

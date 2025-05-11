@@ -44,20 +44,43 @@ const AccommodationListScreen = () => {
     setModalVisible(false);
   };
 
-  const handleFormSubmit = async (formData: any) => {
-    try {
-      if (editingAccommodation && editingAccommodation.id) {
-        const updated = await updateAccommodation(editingAccommodation.id, formData);
-        setAccommodations(accommodations.map(a => (a.id === updated.id ? updated : a)));
+const handleFormSubmit = async (formData: any) => {
+  try {
+    const payload = {
+      IDaccommodation: editingAccommodation?.id ?? 0,
+      Name: formData.name,
+      Type: formData.type,
+      Address: formData.address,
+      Price: parseFloat(formData.price),
+      CreatedAt: editingAccommodation?.createdAt || new Date().toISOString(),
+      UpdatedAt: new Date().toISOString(),
+    };
+
+    if (editingAccommodation) {
+      const updated = await updateAccommodation(editingAccommodation.id, payload);
+
+      if (updated && updated.iDaccommodation !== undefined) {
+        setAccommodations(prev =>
+          prev.map(a =>
+            a.id === updated.iDaccommodation
+              ? { ...updated, id: updated.iDaccommodation }
+              : a
+          )
+        );
       } else {
-        const newAccommodation = await createAccommodation(formData);
-        setAccommodations([...accommodations, newAccommodation]);
+        console.warn('Brak danych z updateAccommodation');
       }
-      handleFormClose();
-    } catch (err) {
-      console.error('Błąd podczas zapisu:', err);
+    } else {
+      const created = await createAccommodation(payload);
+      setAccommodations(prev => [...prev, { ...created, id: created.iDaccommodation }]);
     }
-  };
+
+    handleFormClose();
+  } catch (err) {
+    console.error('Błąd podczas zapisu:', err);
+  }
+};
+
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);

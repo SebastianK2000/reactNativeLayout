@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, View, Text, StyleSheet, Button } from 'react-native';
+import { ScrollView, View, Text, StyleSheet, Button, Alert } from 'react-native';
 import { getBookings, createBooking, updateBooking, deleteBooking } from '../../../../services/api';
 import BookingForm from './bookingForm';
 
@@ -12,6 +12,7 @@ const BookingListScreen = () => {
     const fetchBookings = async () => {
       try {
         const bookingData = await getBookings();
+        console.log("Booking data:", bookingData);
         setBookings(bookingData);
       } catch (err) {
         console.error(err);
@@ -20,10 +21,16 @@ const BookingListScreen = () => {
     fetchBookings();
   }, []);
 
-  const handleDeleteBooking = async (id: string) => {
+  const handleDeleteBooking = async (id: number | string | undefined) => {
+    if (!id) {
+      console.error("Brak ID rezerwacji do usunięcia");
+      return;
+    }
+
     try {
       await deleteBooking(id);
       setBookings(bookings.filter((item: any) => item.id !== id));
+      Alert.alert("Sukces", "Rezerwacja została usunięta.");
     } catch (err) {
       console.error('Delete error', err);
     }
@@ -56,17 +63,21 @@ const BookingListScreen = () => {
   };
 
   const renderBooking = (item: any) => (
-    <View style={styles.itemBox}>
+    <View style={styles.itemBox} key={item.id}>
       <Text style={styles.itemTitle}>Booking ID: {item.IDbooking || 'No ID'}</Text>
       <Text style={styles.itemDetail}>👤 User ID: {item.IDuser || 'No User'}</Text>
-      <Text style={styles.itemDetail}>📅 Booking Date: {item.bookingDate || 'No Date'}</Text>
+      <Text style={styles.itemDetail}>📅 Booking Date: {item.bookingDate?.split('T')[0] || 'No Date'}</Text>
       <Text style={styles.itemDetail}>🏠 Accommodation ID: {item.IDaccommodation || 'No Accommodation'}</Text>
       <Text style={styles.itemDetail}>💰 Price: {item.totalPrice ? `${item.totalPrice} $` : 'No Price'}</Text>
       <Text style={styles.itemDetail}>🔄 Status: {item.status || 'No status'}</Text>
 
       <View style={styles.buttonContainer}>
-        <Button title="Edit" onPress={() => handleEditBooking(item)} />
-        <Button title="Delete" onPress={() => handleDeleteBooking(item.id)} />
+        <View style={styles.buttonSpacing}>
+          <Button title="Edytuj" onPress={() => handleEditBooking(item)} />
+        </View>
+        <View style={styles.buttonSpacing}>
+          <Button title="Usuń" color="#d9534f" onPress={() => handleDeleteBooking(item.id)} />
+        </View>
       </View>
     </View>
   );
@@ -74,10 +85,10 @@ const BookingListScreen = () => {
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.sectionTitle}>🏨 Bookings</Text>
-      <Button title="Add New Booking" onPress={() => setModalVisible(true)} />
-      {bookings.map((item, index) => (
-        <React.Fragment key={index}>{renderBooking(item)}</React.Fragment>
-      ))}
+      <View style={styles.addButton}>
+        <Button title="Dodaj rezerwację" onPress={() => setModalVisible(true)} />
+      </View>
+      {bookings.map((item) => renderBooking(item))}
       {modalVisible && (
         <BookingForm
           visible={modalVisible}
@@ -96,7 +107,18 @@ const styles = StyleSheet.create({
   itemBox: { backgroundColor: '#f8f8f8', borderRadius: 8, padding: 14, marginBottom: 12 },
   itemTitle: { fontSize: 18, fontWeight: 'bold', color: '#333', marginBottom: 8 },
   itemDetail: { fontSize: 16, color: '#555', marginBottom: 4 },
-  buttonContainer: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  buttonSpacing: {
+    flex: 1,
+    marginHorizontal: 5,
+  },
+  addButton: {
+    marginBottom: 20,
+  },
 });
 
 export default BookingListScreen;

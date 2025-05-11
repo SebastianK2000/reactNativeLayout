@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ScrollView, View, Text, StyleSheet, Button, TextInput, Alert } from 'react-native';
-import { getTrips, createTrip } from '../../../../services/api'; // Zakładając, że masz funkcję addTrip w API
+import { getTrips, createTrip } from '../../../../services/api';
 
 const TripsListScreen = () => {
   const [trips, setTrips] = useState([]);
@@ -36,10 +36,9 @@ const TripsListScreen = () => {
     };
 
     try {
-      await createTrip(newTrip); // Zakładając, że masz funkcję addTrip w API
+      await createTrip(newTrip);
       Alert.alert('Success', 'Trip added successfully');
-      setIsFormVisible(false); // Ukryj formularz po dodaniu tripa
-      // Wyczyść formularz po dodaniu tripa
+      setIsFormVisible(false);
       setTripName('');
       setStartDate('');
       setDestination('');
@@ -75,7 +74,6 @@ const TripsListScreen = () => {
     <ScrollView style={styles.container}>
       <Text style={styles.sectionTitle}>🚗 Trips</Text>
 
-      {/* Formularz do dodawania nowej podróży */}
       {isFormVisible ? (
         <View style={styles.formContainer}>
           <TextInput

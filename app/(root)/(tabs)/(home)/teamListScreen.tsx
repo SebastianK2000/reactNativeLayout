@@ -1,15 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, View, Text, StyleSheet, Button } from 'react-native';
-import { getTeams } from '../../../../services/api';
+import { ScrollView, View, Text, StyleSheet, Button, TextInput, Alert } from 'react-native';
+import { getTeams, createTeam, updateTeam, deleteTeam } from '../../../../services/api';
 
 const TeamListScreen = () => {
   interface Team {
     IDteam: string;
-    teamName?: string;
-    creationAt?: string;
+    teamName: string;
+    creationAt: string;
   }
 
   const [teams, setTeams] = useState<Team[]>([]);
+  const [editingTeam, setEditingTeam] = useState<Team | null>(null);
+
+  const today = new Date().toISOString().split('T')[0];
+
+  const [teamName, setTeamName] = useState('');
+  const [creationAt, setCreationAt] = useState(today);
+  const [isFormVisible, setIsFormVisible] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -23,32 +30,99 @@ const TeamListScreen = () => {
     fetchData();
   }, []);
 
-  const handleDeleteTeam = (id: string) => {
-    setTeams(teams.filter((item: any) => item.IDteam !== id));
+  const resetForm = () => {
+    setTeamName('');
+    setCreationAt(today);
+    setEditingTeam(null);
+    setIsFormVisible(false);
   };
 
-  const handleEditTeam = (id: string) => {
-    console.log(`Edit team with id: ${id}`);
+  const handleAddOrUpdateTeam = async () => {
+    if (!teamName || !creationAt) {
+      Alert.alert('Błąd', 'Uzupełnij wszystkie pola');
+      return;
+    }
+
+    const formData = {
+      teamName,
+      creationAt: new Date(creationAt).toISOString(),
+    };
+
+    try {
+      if (editingTeam) {
+        const updated = await updateTeam(editingTeam.IDteam, formData);
+        setTeams(teams.map(t => (t.IDteam === updated.IDteam ? updated : t)));
+        Alert.alert('Zaktualizowano', 'Drużyna została zaktualizowana.');
+      } else {
+        const created = await createTeam(formData);
+        setTeams([...teams, created]);
+        Alert.alert('Dodano', 'Nowa drużyna została dodana.');
+      }
+      resetForm();
+    } catch (error) {
+      console.error('Błąd zapisu drużyny:', error);
+      Alert.alert('Błąd', 'Nie udało się zapisać drużyny.');
+    }
   };
 
-  const renderTeam = (item: any) => (
-    <View style={styles.itemBox}>
+  const handleDeleteTeam = async (id: string) => {
+    try {
+      await deleteTeam(id);
+      setTeams(teams.filter((item) => item.IDteam !== id));
+      Alert.alert('Usunięto', 'Drużyna została usunięta.');
+    } catch (err) {
+      console.error('Błąd usuwania drużyny:', err);
+      Alert.alert('Błąd', 'Nie udało się usunąć drużyny.');
+    }
+  };
+
+  const handleEditTeam = (team: Team) => {
+    setTeamName(team.teamName);
+    setCreationAt(team.creationAt.split('T')[0]);
+    setEditingTeam(team);
+    setIsFormVisible(true);
+  };
+
+  const renderTeam = (item: Team) => (
+    <View style={styles.itemBox} key={item.IDteam}>
       <Text style={styles.itemTitle}>Team: {item.teamName || 'No Name'}</Text>
-      <Text style={styles.itemDetail}>📅 Created: {item.creationAt || 'No Date'}</Text>
+      <Text style={styles.itemDetail}>📅 Created: {item.creationAt?.split('T')[0] || 'No Date'}</Text>
       <View style={styles.buttonContainer}>
-        <Button title="Edit" onPress={() => handleEditTeam(item.IDteam)} />
-        <Button title="Delete" onPress={() => handleDeleteTeam(item.IDteam)} />
+        <View style={styles.buttonSpacing}>
+          <Button title="Edytuj" onPress={() => handleEditTeam(item)} />
+        </View>
+        <View style={styles.buttonSpacing}>
+          <Button title="Usuń" color="#d9534f" onPress={() => handleDeleteTeam(item.IDteam)} />
+        </View>
       </View>
     </View>
   );
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.sectionTitle}>🏁 Teams</Text>
-      <Button title="Add New Team" onPress={() => console.log('Add new Team')} />
-      {teams.map((item) => (
-        <React.Fragment key={item.IDteam}>{renderTeam(item)}</React.Fragment>
-      ))}
+      <Text style={styles.sectionTitle}>🏁 Drużyny</Text>
+
+      {isFormVisible ? (
+        <View style={styles.formContainer}>
+          <TextInput style={styles.input} placeholder="Team Name" value={teamName} onChangeText={setTeamName} />
+          <TextInput style={styles.input} placeholder="Creation Date (YYYY-MM-DD)" value={creationAt} onChangeText={setCreationAt} />
+
+          <View style={styles.formButtons}>
+            <View style={styles.buttonSpacing}>
+              <Button title="Zapisz" onPress={handleAddOrUpdateTeam} />
+            </View>
+            <View style={styles.buttonSpacing}>
+              <Button title="Anuluj" color="#6c757d" onPress={resetForm} />
+            </View>
+          </View>
+        </View>
+      ) : (
+        <View style={styles.addButton}>
+          <Button title="Dodaj nową drużynę" onPress={() => setIsFormVisible(true)} />
+        </View>
+      )}
+
+      {teams.map(renderTeam)}
     </ScrollView>
   );
 };
@@ -56,6 +130,23 @@ const TeamListScreen = () => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff', padding: 16 },
   sectionTitle: { fontSize: 22, fontWeight: 'bold', marginTop: 20, marginBottom: 10, color: '#333' },
+  addButton: { marginBottom: 20 },
+  formContainer: { marginBottom: 20 },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 10,
+  },
+  formButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  buttonSpacing: {
+    flex: 1,
+    marginHorizontal: 5,
+  },
   itemBox: { backgroundColor: '#f8f8f8', borderRadius: 8, padding: 14, marginBottom: 12 },
   itemTitle: { fontSize: 18, fontWeight: 'bold', color: '#333', marginBottom: 8 },
   itemDetail: { fontSize: 16, color: '#555', marginBottom: 4 },

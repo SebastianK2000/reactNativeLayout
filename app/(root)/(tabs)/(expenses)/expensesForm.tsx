@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { Modal, View, TextInput, Button, StyleSheet, Text } from 'react-native';
 
 interface PaymentFormProps {
   visible: boolean;
@@ -21,40 +21,47 @@ interface PaymentFormProps {
 }
 
 const PaymentForm: React.FC<PaymentFormProps> = ({ visible, initialData, onClose, onSubmit }) => {
+  const today = new Date().toISOString().split('T')[0];
+
   const [IDbooking, setIDbooking] = useState('');
   const [Amount, setAmount] = useState('');
-  const [PaymentMethod, setPaymentMethod] = useState('Credit Card'); // Domyślna wartość
-  const [Status, setStatus] = useState('Pending'); // Domyślna wartość
-  const [PaymentDate, setPaymentDate] = useState('');
+  const [PaymentMethod, setPaymentMethod] = useState('Credit Card');
+  const [Status, setStatus] = useState('Pending');
+  const [PaymentDate, setPaymentDate] = useState(today);
 
   useEffect(() => {
     if (initialData) {
       setIDbooking(initialData.IDbooking?.toString() || '');
-      setAmount(initialData.Amount);
-      setPaymentMethod(initialData.PaymentMethod || 'Credit Card'); // Domyślnie ustawiamy na 'Credit Card'
-      setStatus(initialData.Status || 'Pending'); // Domyślnie ustawiamy na 'Pending'
-      setPaymentDate(initialData.PaymentDate);
-    } else {
-      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-      setPaymentDate(today);
+      setAmount(initialData.Amount || '');
+      setPaymentMethod(initialData.PaymentMethod || 'Credit Card');
+      setStatus(initialData.Status || 'Pending');
+      setPaymentDate(initialData.PaymentDate || today);
     }
   }, [initialData]);
 
   const handleSubmit = () => {
-    const newPayment = {
-      IDbooking: parseInt(IDbooking, 10) || 0,
+    if (!IDbooking || isNaN(Number(IDbooking)) || !Amount || isNaN(Number(Amount)) || !PaymentMethod || !Status || !PaymentDate) {
+      alert('Wszystkie pola muszą być wypełnione poprawnie');
+      return;
+    }
+
+    onSubmit({
+      IDbooking: parseInt(IDbooking, 10),
       Amount,
       PaymentMethod,
       Status,
       PaymentDate,
-    };
-    onSubmit(newPayment);
+    });
+
+    onClose();
   };
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <View style={styles.modalContainer}>
-        <Text style={styles.title}>Add / Edit Payment</Text>
+      <View style={styles.container}>
+        <Text style={styles.title}>
+          {initialData ? 'Edytuj Płatność' : 'Dodaj Nową Płatność'}
+        </Text>
 
         <TextInput
           style={styles.input}
@@ -65,14 +72,14 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ visible, initialData, onClose
         />
         <TextInput
           style={styles.input}
-          placeholder="Amount"
+          placeholder="Kwota"
           keyboardType="numeric"
           value={Amount}
           onChangeText={setAmount}
         />
         <TextInput
           style={styles.input}
-          placeholder="Payment Method"
+          placeholder="Metoda płatności"
           value={PaymentMethod}
           onChangeText={setPaymentMethod}
         />
@@ -84,24 +91,44 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ visible, initialData, onClose
         />
         <TextInput
           style={styles.input}
-          placeholder="Payment Date (YYYY-MM-DD)"
+          placeholder="Data (YYYY-MM-DD)"
           value={PaymentDate}
           onChangeText={setPaymentDate}
         />
 
-        <Button title="Submit" onPress={handleSubmit} />
-        <View style={{ marginTop: 10 }} />
-        <Button title="Cancel" onPress={onClose} />
+        <View style={styles.buttonGroup}>
+          <Button title="Anuluj" onPress={onClose} color="grey" />
+          <Button title="Zapisz" onPress={handleSubmit} />
+        </View>
       </View>
     </Modal>
   );
 };
 
-
 const styles = StyleSheet.create({
-  modalContainer: { flex: 1, justifyContent: 'center', padding: 20 },
-  title: { fontSize: 20, fontWeight: 'bold', marginBottom: 20 },
-  input: { height: 40, borderColor: '#ccc', borderWidth: 1, marginBottom: 12, paddingHorizontal: 8 },
+  container: {
+    padding: 24,
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+  },
+  input: {
+    borderBottomWidth: 1,
+    marginBottom: 12,
+    padding: 8,
+    fontSize: 16,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  buttonGroup: {
+    marginTop: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
 });
 
 export default PaymentForm;

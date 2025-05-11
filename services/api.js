@@ -5,6 +5,11 @@ const handleResponse = async (response) => {
     const errorText = await response.text();
     throw new Error(errorText || 'Wystąpił błąd');
   }
+
+  if (response.status === 204) {
+    return null;
+  }
+
   return response.json();
 };
 
@@ -12,7 +17,13 @@ const handleResponse = async (response) => {
 export const getAccommodations = async () => {
   try {
     const response = await fetch(`${BASE_URL}/Accommodation`);
-    return await handleResponse(response);
+    const data = await handleResponse(response);
+    console.log('Odpowiedź z API:', data);
+
+    return data.map((item) => ({
+      ...item,
+      id: item.iDaccommodation,
+    }));
   } catch (error) {
     console.error('Błąd pobierania noclegów:', error);
     throw error;
@@ -124,7 +135,12 @@ export const deleteUser = async (id) => {
 export const getBookings = async () => {
   try {
     const response = await fetch(`${BASE_URL}/Booking`);
-    return await handleResponse(response);
+    const data = await handleResponse(response);
+
+    return data.map(item => ({
+      ...item,
+      id: item.iDbooking,
+    }));
   } catch (error) {
     console.error('Błąd pobierania rezerwacji:', error);
     throw error;
@@ -160,10 +176,12 @@ export const updateBooking = async (id, updatedBooking) => {
 };
 
 export const deleteBooking = async (id) => {
-  return await fetch(`${BASE_URL}/Booking/${id}`, {
+  const response = await fetch(`${BASE_URL}/Booking/${id}`, {
     method: 'DELETE',
   });
+  return await handleResponse(response);
 };
+
 
 // ---------- PAYMENT ----------
 export const getPayments = async () => {
@@ -178,17 +196,15 @@ export const getPayments = async () => {
 
 export const createPayment = async (payment) => {
   try {
-    // Sprawdzamy, czy data jest w poprawnym formacie (np. yyyy-MM-dd)
     if (payment.paymentDate) {
       const date = new Date(payment.paymentDate);
-      payment.paymentDate = date.toISOString(); // Zamieniamy na format ISO
+      payment.paymentDate = date.toISOString();
     }
 
-    // Tworzymy obiekt 'payment' jeśli wymagany przez API
     const paymentData = {
       amount: payment.amount,
-      paymentMethod: payment.PaymentMethod,  // Sprawdź, czy masz poprawną nazwę tego pola
-      status: payment.Status,                // Sprawdź, czy masz poprawną nazwę tego pola
+      paymentMethod: payment.PaymentMethod,
+      status: payment.Status,
       paymentDate: payment.paymentDate,
     };
 
@@ -336,13 +352,16 @@ export const deleteTeamMember = async (id) => {
 export const getTrips = async () => {
   try {
     const response = await fetch(`${BASE_URL}/Trip`);
-    return await handleResponse(response);
+    const data = await handleResponse(response);
+    return data.map(item => ({
+      ...item,
+      id: item.iDtrip, // 👈 ZGODNIE z nazwą z backendu
+    }));
   } catch (error) {
     console.error('Błąd pobierania wyjazdów:', error);
     throw error;
   }
 };
-
 export const createTrip = async (trip) => {
   try {
     const response = await fetch(`${BASE_URL}/Trip`, {

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ScrollView, View, Text, StyleSheet, Button } from 'react-native';
 import { getPayments, createPayment, updatePayment, deletePayment } from '../../../../services/api';
-import PaymentForm from './expensesForm'; // Formularz płatności
+import PaymentForm from './expensesForm';
 
 interface Payment {
   IDpayment?: number;
@@ -72,28 +72,32 @@ const ExpensesListScreen = () => {
 
   const renderPayment = (payment: Payment) => (
     <View key={payment.IDpayment} style={styles.itemBox}>
-      <Text style={styles.itemTitle}>Payment #{payment.IDpayment}</Text>
+      <Text style={styles.itemTitle}>💸 Płatność #{payment.IDpayment}</Text>
       <Text style={styles.itemDetail}>📚 Booking ID: {payment.IDbooking}</Text>
-      <Text style={styles.itemDetail}>📅 Date: {formatDate(payment.PaymentDate)}</Text>
+      <Text style={styles.itemDetail}>📅 Data: {formatDate(payment.PaymentDate)}</Text>
       <Text style={styles.itemDetail}>
-        💰 Amount: {payment.Amount !== undefined ? `$${payment.Amount.toFixed(2)}` : 'N/A'}
+        💰 Kwota: {payment.Amount !== undefined ? `$${payment.Amount.toFixed(2)}` : 'Brak'}
       </Text>      
-      <Text style={styles.itemDetail}>💳 Method: {payment.PaymentMethod}</Text>
+      <Text style={styles.itemDetail}>💳 Metoda: {payment.PaymentMethod}</Text>
       <Text style={styles.itemDetail}>🔴 Status: {payment.Status}</Text>
       <View style={styles.buttonContainer}>
-        <Button title="Edit" onPress={() => handleEditPayment(payment.IDpayment!)} />
-        <Button title="Delete" onPress={() => handleDeletePayment(payment.IDpayment!)} />
+        <View style={styles.buttonSpacing}>
+          <Button title="Edytuj" onPress={() => handleEditPayment(payment.IDpayment!)} />
+        </View>
+        <View style={styles.buttonSpacing}>
+          <Button title="Usuń" color="#d9534f" onPress={() => handleDeletePayment(payment.IDpayment!)} />
+        </View>
       </View>
     </View>
   );
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.sectionTitle}>💳 Payments</Text>
-      <Button title="Add New Payment" onPress={() => setModalVisible(true)} />
-{payments.map((item) => (
-  <React.Fragment key={item.IDpayment}>{renderPayment(item)}</React.Fragment>
-))}
+      <Text style={styles.sectionTitle}>💳 Lista płatności</Text>
+      <View style={styles.addButton}>
+        <Button title="Dodaj płatność" onPress={() => setModalVisible(true)} />
+      </View>
+      {payments.map(renderPayment)}
       {modalVisible && (
         <PaymentForm
           visible={modalVisible}
@@ -127,10 +131,12 @@ const ExpensesListScreen = () => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff', padding: 16 },
   sectionTitle: { fontSize: 22, fontWeight: 'bold', marginTop: 20, marginBottom: 10, color: '#333' },
+  addButton: { marginBottom: 20 },
   itemBox: { backgroundColor: '#f8f8f8', borderRadius: 8, padding: 14, marginBottom: 12 },
   itemTitle: { fontSize: 18, fontWeight: 'bold', color: '#333', marginBottom: 8 },
   itemDetail: { fontSize: 16, color: '#555', marginBottom: 4 },
   buttonContainer: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 },
+  buttonSpacing: { flex: 1, marginHorizontal: 5 },
 });
 
 export default ExpensesListScreen;

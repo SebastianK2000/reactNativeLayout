@@ -20,12 +20,17 @@ const AccommodationListScreen = () => {
     fetchAccommodations();
   }, []);
 
-  const handleDeleteAccommodation = async (id: string) => {
+  const handleDeleteAccommodation = async (id?: string | number) => {
+    if (!id) {
+      console.error("Brak ID noclegu do usunięcia");
+      return;
+    }
+
     try {
       await deleteAccommodation(id);
-      setAccommodations(accommodations.filter((item: any) => item.id !== id));
-    } catch (err) {
-      console.error('Błąd usuwania:', err);
+      setAccommodations(accommodations.filter((item) => item.id !== id));
+    } catch (error) {
+      console.error("Błąd usuwania:", error);
     }
   };
 
@@ -64,7 +69,7 @@ const AccommodationListScreen = () => {
   };
 
   const renderAccommodation = (item: any) => (
-    <View style={styles.itemBox}>
+    <View style={styles.itemBox} key={item.id}>
       <Text style={styles.itemTitle}>{item.name || 'Brak nazwy'}</Text>
       <Text style={styles.itemDetail}>📍 Adres: {item.address || 'Brak adresu'}</Text>
       <Text style={styles.itemDetail}>🏠 Typ: {item.type || 'Brak typu'}</Text>
@@ -73,8 +78,12 @@ const AccommodationListScreen = () => {
       <Text style={styles.itemDetail}>👤 Stworzone przez: {item.createdBy}</Text>
 
       <View style={styles.buttonContainer}>
-        <Button title="Edytuj" onPress={() => handleEditAccommodation(item)} />
-        <Button title="Usuń" onPress={() => handleDeleteAccommodation(item.id)} />
+        <View style={styles.buttonSpacing}>
+          <Button title="Edytuj" onPress={() => handleEditAccommodation(item)} />
+        </View>
+        <View style={styles.buttonSpacing}>
+          <Button title="Usuń" color="#d9534f" onPress={() => handleDeleteAccommodation(item.id)} />
+        </View>
       </View>
     </View>
   );
@@ -82,10 +91,10 @@ const AccommodationListScreen = () => {
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.sectionTitle}>🏨 Zakwaterowania</Text>
-      <Button title="Dodaj nowe zakwaterowanie" onPress={() => setModalVisible(true)} />
-      {accommodations.map((item, index) => (
-        <React.Fragment key={index}>{renderAccommodation(item)}</React.Fragment>
-      ))}
+      <View style={styles.addButton}>
+        <Button title="Dodaj nowe zakwaterowanie" onPress={() => setModalVisible(true)} />
+      </View>
+      {accommodations.map(renderAccommodation)}
       {modalVisible && (
         <AccommodationForm
           visible={modalVisible}
@@ -101,10 +110,12 @@ const AccommodationListScreen = () => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff', padding: 16 },
   sectionTitle: { fontSize: 22, fontWeight: 'bold', marginTop: 20, marginBottom: 10, color: '#333' },
+  addButton: { marginBottom: 20 },
   itemBox: { backgroundColor: '#f8f8f8', borderRadius: 8, padding: 14, marginBottom: 12 },
   itemTitle: { fontSize: 18, fontWeight: 'bold', color: '#333', marginBottom: 8 },
   itemDetail: { fontSize: 16, color: '#555', marginBottom: 4 },
   buttonContainer: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 },
+  buttonSpacing: { flex: 1, marginHorizontal: 5 },
 });
 
 export default AccommodationListScreen;

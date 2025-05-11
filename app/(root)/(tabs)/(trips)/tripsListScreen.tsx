@@ -1,22 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import { ScrollView, View, Text, StyleSheet, Button, TextInput, Alert } from 'react-native';
-import { getTrips, createTrip } from '../../../../services/api'; // Zakładam, że masz funkcję addTrip w API
+import { getTrips, createTrip, updateTrip, deleteTrip } from '../../../../services/api';
 
 const TripsListScreen = () => {
   interface Trip {
+    id: number;
     tripName: string;
     startDate: string;
+    endDate: string;
     destination: string;
-    description: string;
-    id?: string; // Optional if IDs are generated later
   }
 
   const [trips, setTrips] = useState<Trip[]>([]);
-  const [isAdding, setIsAdding] = useState(false); // Nowy stan do kontrolowania widoczności formularza
-  const [newTripName, setNewTripName] = useState('');
-  const [newTripDate, setNewTripDate] = useState('');
-  const [newTripDestination, setNewTripDestination] = useState('');
-  const [newTripDescription, setNewTripDescription] = useState('');
+  const [editingTrip, setEditingTrip] = useState<Trip | null>(null);
+
+  const today = new Date().toISOString().split('T')[0];
+
+  const [tripName, setTripName] = useState('');
+  const [startDate, setStartDate] = useState(today);
+  const [endDate, setEndDate] = useState(today);
+  const [destination, setDestination] = useState('');
+  const [isFormVisible, setIsFormVisible] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -30,97 +34,109 @@ const TripsListScreen = () => {
     fetchData();
   }, []);
 
-  const handleDeleteTrip = (id: string) => {
-    setTrips(trips.filter((item: any) => item.id !== id));
+  const resetForm = () => {
+    setTripName('');
+    setStartDate(today);
+    setEndDate(today);
+    setDestination('');
+    setEditingTrip(null);
+    setIsFormVisible(false);
   };
 
-  const handleEditTrip = (id: string) => {
-    console.log(`Edit trip with id: ${id}`);
-  };
-
-  const handleAddTrip = async () => {
-    if (!newTripName || !newTripDate || !newTripDestination || !newTripDescription) {
+  const handleAddOrUpdateTrip = async () => {
+    if (!tripName || !startDate || !endDate || !destination) {
       Alert.alert('Error', 'Please fill out all fields');
       return;
     }
 
-    const newTrip = {
-      tripName: newTripName,
-      startDate: newTripDate,
-      destination: newTripDestination,
-      description: newTripDescription,
+    const tripPayload = {
+      tripName,
+      startDate: new Date(startDate).toISOString(),
+      endDate: new Date(endDate).toISOString(),
+      destination,
+      IDuser: 1,
     };
 
     try {
-      await createTrip(newTrip); // Zakładając, że masz funkcję addTrip w API
-      setTrips([...trips, newTrip]); // Dodaj nową podróż do listy
-      // Wyczyść formularz po dodaniu
-      setNewTripName('');
-      setNewTripDate('');
-      setNewTripDestination('');
-      setNewTripDescription('');
-      setIsAdding(false); // Zatrzymaj wyświetlanie formularza
+      if (editingTrip) {
+        const updated = await updateTrip(editingTrip.id, tripPayload);
+        setTrips(trips.map(t => (t.id === updated.id ? updated : t)));
+        Alert.alert('Zaktualizowano', 'Wyjazd został zaktualizowany.');
+      } else {
+        const created = await createTrip(tripPayload);
+        setTrips([...trips, { ...created, id: created.iDtrip }]);
+        Alert.alert('Dodano', 'Nowy wyjazd został dodany.');
+      }
+      resetForm();
     } catch (error) {
-      console.error('Error adding new trip:', error);
-      Alert.alert('Error', 'Failed to add new trip');
+      console.error('Błąd zapisu:', error);
+      Alert.alert('Błąd', 'Nie udało się zapisać wyjazdu');
     }
   };
 
-  const renderTrip = (item: any) => (
-    <View style={styles.itemBox}>
-      <Text style={styles.itemTitle}>Trip: {item.tripName || 'No Name'}</Text>
-      <Text style={styles.itemDetail}>📅 Date: {item.startDate || 'No Date'}</Text>
-      <Text style={styles.itemDetail}>🏠 Location: {item.destination || 'No Location'}</Text>
-      <Text style={styles.itemDetail}>📝 Description: {item.description || 'No Description'}</Text>
+  const handleDeleteTrip = async (id: number) => {
+    try {
+      await deleteTrip(id);
+      setTrips(trips.filter((item) => item.id !== id));
+      Alert.alert('Usunięto', 'Wyjazd został usunięty.');
+    } catch (err) {
+      console.error('Błąd usuwania wyjazdu:', err);
+      Alert.alert('Błąd', 'Nie udało się usunąć wyjazdu.');
+    }
+  };
+
+  const handleEditTrip = (trip: Trip) => {
+    setTripName(trip.tripName);
+    setStartDate(trip.startDate.split('T')[0]);
+    setEndDate(trip.endDate.split('T')[0]);
+    setDestination(trip.destination);
+    setEditingTrip(trip);
+    setIsFormVisible(true);
+  };
+
+  const renderTrip = (item: Trip) => (
+    <View style={styles.itemBox} key={item.id}>
+      <Text style={styles.itemTitle}>Trip: {item.tripName}</Text>
+      <Text style={styles.itemDetail}>📅 Start: {item.startDate?.split('T')[0]}</Text>
+      <Text style={styles.itemDetail}>📅 End: {item.endDate?.split('T')[0]}</Text>
+      <Text style={styles.itemDetail}>🏠 Destination: {item.destination}</Text>
       <View style={styles.buttonContainer}>
-        <Button title="Edit" onPress={() => handleEditTrip(item.id)} />
-        <Button title="Delete" onPress={() => handleDeleteTrip(item.id)} />
+        <View style={styles.buttonSpacing}>
+          <Button title="Edytuj" onPress={() => handleEditTrip(item)} />
+        </View>
+        <View style={styles.buttonSpacing}>
+          <Button title="Usuń" color="#d9534f" onPress={() => handleDeleteTrip(item.id)} />
+        </View>
       </View>
     </View>
   );
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.sectionTitle}>🚗 Trips</Text>
+      <Text style={styles.sectionTitle}>🚗 Lista wyjazdów</Text>
 
-      {/* Formularz do dodawania nowej podróży */}
-      {isAdding ? (
+      {isFormVisible ? (
         <View style={styles.formContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Trip Name"
-            value={newTripName}
-            onChangeText={setNewTripName}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Start Date (YYYY-MM-DD)"
-            value={newTripDate}
-            onChangeText={setNewTripDate}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Destination"
-            value={newTripDestination}
-            onChangeText={setNewTripDestination}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Description"
-            value={newTripDescription}
-            onChangeText={setNewTripDescription}
-          />
-          <Button title="Add Trip" onPress={handleAddTrip} />
-          <Button title="Cancel" onPress={() => setIsAdding(false)} />
+          <TextInput style={styles.input} placeholder="Trip Name" value={tripName} onChangeText={setTripName} />
+          <TextInput style={styles.input} placeholder="Start Date (YYYY-MM-DD)" value={startDate} onChangeText={setStartDate} />
+          <TextInput style={styles.input} placeholder="End Date (YYYY-MM-DD)" value={endDate} onChangeText={setEndDate} />
+          <TextInput style={styles.input} placeholder="Destination" value={destination} onChangeText={setDestination} />
+          <View style={styles.formButtons}>
+            <View style={styles.buttonSpacing}>
+              <Button title="Zapisz" onPress={handleAddOrUpdateTrip} />
+            </View>
+            <View style={styles.buttonSpacing}>
+              <Button title="Anuluj" color="#6c757d" onPress={resetForm} />
+            </View>
+          </View>
         </View>
       ) : (
-        <Button title="Add New Trip" onPress={() => setIsAdding(true)} />
+        <View style={styles.addButton}>
+          <Button title="Dodaj nowy wyjazd" onPress={() => setIsFormVisible(true)} />
+        </View>
       )}
 
-      {/* Lista podróży */}
-      {trips.map((item, index) => (
-        <React.Fragment key={index}>{renderTrip(item)}</React.Fragment>
-      ))}
+      {trips.map(renderTrip)}
     </ScrollView>
   );
 };
@@ -128,12 +144,7 @@ const TripsListScreen = () => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff', padding: 16 },
   sectionTitle: { fontSize: 22, fontWeight: 'bold', marginTop: 20, marginBottom: 10, color: '#333' },
-  itemBox: { backgroundColor: '#f8f8f8', borderRadius: 8, padding: 14, marginBottom: 12 },
-  itemTitle: { fontSize: 18, fontWeight: 'bold', color: '#333', marginBottom: 8 },
-  itemDetail: { fontSize: 16, color: '#555', marginBottom: 4 },
-  buttonContainer: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 },
-
-  // Styl formularza
+  addButton: { marginBottom: 20 },
   formContainer: { marginBottom: 20 },
   input: {
     borderWidth: 1,
@@ -142,6 +153,18 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 10,
   },
+  formButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  buttonSpacing: {
+    flex: 1,
+    marginHorizontal: 5,
+  },
+  itemBox: { backgroundColor: '#f8f8f8', borderRadius: 8, padding: 14, marginBottom: 12 },
+  itemTitle: { fontSize: 18, fontWeight: 'bold', color: '#333', marginBottom: 8 },
+  itemDetail: { fontSize: 16, color: '#555', marginBottom: 4 },
+  buttonContainer: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 },
 });
 
 export default TripsListScreen;

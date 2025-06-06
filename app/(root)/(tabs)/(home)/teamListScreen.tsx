@@ -38,35 +38,46 @@ const TeamListScreen = () => {
   };
 
   const handleAddOrUpdateTeam = async () => {
-  if (!teamName || !creationAt) {
-    Alert.alert('Błąd', 'Uzupełnij wszystkie pola');
-    return;
-  }
-
-  const payload = {
-    IDteam: editingTeam?.IDteam ?? 0,
-    TeamName: teamName,
-    CreatedAt: editingTeam?.creationAt || new Date().toISOString(),
-    UpdatedAt: new Date().toISOString(),
-  };
-
-  try {
-    if (editingTeam) {
-      const updated = await updateTeam(editingTeam.IDteam, payload);
-      setTeams(teams.map(t => (t.IDteam === updated.iDteam ? { ...updated, IDteam: updated.iDteam } : t)));
-      Alert.alert('Zaktualizowano', 'Drużyna została zaktualizowana.');
-    } else {
-      const created = await createTeam(payload);
-      setTeams([...teams, { ...created, IDteam: created.iDteam }]);
-      Alert.alert('Dodano', 'Nowa drużyna została dodana.');
+    if (!teamName || !creationAt) {
+      Alert.alert('Błąd', 'Uzupełnij wszystkie pola');
+      return;
     }
-    resetForm();
-  } catch (error) {
-    console.error('Błąd zapisu drużyny:', error);
-    Alert.alert('Błąd', 'Nie udało się zapisać drużyny.');
-  }
-};
 
+    const payload = {
+      IDteam: editingTeam?.IDteam ?? 0,
+      TeamName: teamName,
+      CreatedAt: editingTeam?.creationAt || new Date().toISOString(),
+      UpdatedAt: new Date().toISOString(),
+    };
+
+    try {
+      if (editingTeam) {
+        const updated = await updateTeam(editingTeam.IDteam, payload);
+
+        if (updated && updated.iDteam) {
+          setTeams(prev =>
+            prev.map(t =>
+              t.IDteam === updated.iDteam
+                ? { ...updated, IDteam: updated.iDteam, creationAt: updated.createdAt }
+                : t
+            )
+          );
+          Alert.alert('Zaktualizowano', 'Drużyna została zaktualizowana.');
+        } else {
+          Alert.alert('Błąd', 'Brak danych z serwera po aktualizacji.');
+        }
+      } else {
+        const created = await createTeam(payload);
+        setTeams(prev => [...prev, { ...created, IDteam: created.iDteam, creationAt: created.createdAt }]);
+        Alert.alert('Dodano', 'Nowa drużyna została dodana.');
+      }
+
+      resetForm();
+    } catch (error) {
+      console.error('Błąd zapisu drużyny:', error);
+      Alert.alert('Błąd', 'Nie udało się zapisać drużyny.');
+    }
+  };
 
   const handleDeleteTeam = async (id: string) => {
     try {

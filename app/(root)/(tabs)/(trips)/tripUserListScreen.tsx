@@ -1,36 +1,54 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, View, Text, StyleSheet, Button, TextInput, Alert } from 'react-native';
-import { getTripUsers, createTripUser, updateTripUser, deleteTripUser } from '../../../../services/api';
+import { ScrollView, View, Text, StyleSheet, Button, Alert, TextInput } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
+import { getTripUsers, createTripUser, updateTripUser, deleteTripUser, getUsers, getTrips } from '../../../../services/api';
 
 const TripUsersListScreen = () => {
+  interface User {
+    IDuser: string;
+    firstName: string;
+    lastName: string;
+  }
+
+  interface Trip {
+    IDtrip: string;
+    tripName: string;
+  }
+
   interface TripUser {
     IDtripUser: string;
     IDuser: string;
     IDtrip: string;
     joinDate: string;
+    User?: User;
+    Trip?: Trip;
   }
 
   const [tripUsers, setTripUsers] = useState<TripUser[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [trips, setTrips] = useState<Trip[]>([]);
   const [editingUser, setEditingUser] = useState<TripUser | null>(null);
 
   const today = new Date().toISOString().split('T')[0];
-
   const [IDuser, setIDuser] = useState('');
   const [IDtrip, setIDtrip] = useState('');
   const [joinDate, setJoinDate] = useState(today);
   const [isFormVisible, setIsFormVisible] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const users = await getTripUsers();
-        setTripUsers(users);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchData();
-  }, []);
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const [tu, us, ts] = await Promise.all([getTripUsers(), getUsers(), getTrips()]);
+      console.log('TripUsers z API:', tu);
+      setTripUsers(tu);
+      setUsers(us);
+      setTrips(ts);
+    } catch (err) {
+      console.error('Błąd ładowania danych:', err);
+    }
+  };
+  fetchData();
+}, []);
 
   const resetForm = () => {
     setIDuser('');
@@ -40,39 +58,48 @@ const TripUsersListScreen = () => {
     setIsFormVisible(false);
   };
 
-  const handleAddOrUpdate = async () => {
-    if (!IDuser || !IDtrip || !joinDate) {
-      Alert.alert('Błąd', 'Uzupełnij wszystkie pola');
-      return;
+const handleAddOrUpdate = async () => {
+  console.log('Kliknięto Zapisz!');
+
+  const parsedIDuser = parseInt(IDuser, 10);
+  const parsedIDtrip = parseInt(IDtrip, 10);
+
+  if (isNaN(parsedIDuser) || isNaN(parsedIDtrip)) {
+    Alert.alert('Błąd', 'Wybrano niepoprawnego użytkownika lub wyjazd');
+    return;
+  }
+
+const payload = {
+  IDtripUser: editingUser?.IDtripUser ?? '0',
+  IDuser: parsedIDuser,
+  IDtrip: parsedIDtrip,
+  joinDate: new Date(joinDate).toISOString(), // ✅ z małej litery
+};
+
+  try {
+    if (editingUser) {
+      console.log('Aktualizacja z danymi:', payload);
+      await updateTripUser(editingUser.IDtripUser, payload);
+      Alert.alert('Zaktualizowano', 'Użytkownik zaktualizowany.');
+    } else {
+      console.log('Tworzenie z danymi:', payload);
+      const created = await createTripUser(payload);
+      console.log('Odpowiedź:', created);
+      Alert.alert('Dodano', 'Użytkownik dodany do wyjazdu.');
+      setTripUsers(prev => [...prev, created]);
     }
 
-    const payload = {
-      IDuser,
-      IDtrip,
-      joinDate: new Date(joinDate).toISOString(),
-    };
-
-    try {
-      if (editingUser) {
-        await updateTripUser(editingUser.IDtripUser, payload);
-        setTripUsers(tripUsers.map(u => (u.IDtripUser === editingUser.IDtripUser ? { ...payload, IDtripUser: editingUser.IDtripUser } : u)));
-        Alert.alert('Zaktualizowano', 'Użytkownik zaktualizowany.');
-      } else {
-        const created = await createTripUser(payload);
-        setTripUsers([...tripUsers, created]);
-        Alert.alert('Dodano', 'Użytkownik dodany do wyjazdu.');
-      }
-      resetForm();
-    } catch (error) {
-      console.error('Błąd zapisu:', error);
-      Alert.alert('Błąd', 'Nie udało się zapisać danych.');
-    }
-  };
+    resetForm(); // ✅ reset wewnątrz try, po udanym zapisie
+  } catch (error: any) {
+    console.error('Błąd zapisu:', error.message || error);
+    Alert.alert('Błąd', 'Nie udało się zapisać danych.');
+  }
+};
 
   const handleDelete = async (id: string) => {
     try {
       await deleteTripUser(id);
-      setTripUsers(tripUsers.filter(u => u.IDtripUser !== id));
+      setTripUsers(prev => prev.filter(u => u.IDtripUser !== id));
       Alert.alert('Usunięto', 'Użytkownik został usunięty.');
     } catch (error) {
       console.error('Błąd usuwania:', error);
@@ -89,9 +116,10 @@ const TripUsersListScreen = () => {
   };
 
   const renderUser = (user: TripUser) => (
+      console.log('Render user item:', user), // 👈 dodaj to
     <View style={styles.itemBox} key={user.IDtripUser}>
-      <Text style={styles.itemTitle}>User: {user.IDuser}</Text>
-      <Text style={styles.itemDetail}>🧳 Trip ID: {user.IDtrip}</Text>
+    <Text>User: {user.User?.firstName} {user.User?.lastName}</Text>
+    <Text>Trip: {user.Trip?.tripName}</Text>
       <Text style={styles.itemDetail}>📅 Join Date: {user.joinDate?.split('T')[0]}</Text>
       <View style={styles.buttonContainer}>
         <View style={styles.buttonSpacing}>
@@ -110,9 +138,35 @@ const TripUsersListScreen = () => {
 
       {isFormVisible ? (
         <View style={styles.formContainer}>
-          <TextInput style={styles.input} placeholder="ID Użytkownika" value={IDuser} onChangeText={setIDuser} />
-          <TextInput style={styles.input} placeholder="ID Wyjazdu" value={IDtrip} onChangeText={setIDtrip} />
-          <TextInput style={styles.input} placeholder="Data dołączenia (YYYY-MM-DD)" value={joinDate} onChangeText={setJoinDate} />
+          <Picker selectedValue={IDuser} onValueChange={setIDuser} style={styles.input}>
+            <Picker.Item label="-- Wybierz użytkownika --" value="" />
+            {users.map(user => (
+        <Picker.Item
+          key={user.IDuser}
+          label={
+            user.firstName && user.lastName
+              ? `${user.firstName} ${user.lastName}`
+              : 'Nieznany użytkownik'
+          }
+          value={user.IDuser}
+        />
+            ))}
+          </Picker>
+
+          <Picker selectedValue={IDtrip} onValueChange={setIDtrip} style={styles.input}>
+            <Picker.Item label="-- Wybierz wyjazd --" value="" />
+            {trips.map(trip => (
+              <Picker.Item key={trip.IDtrip} label={trip.tripName} value={trip.IDtrip} />
+            ))}
+          </Picker>
+
+          <TextInput
+            style={styles.input}
+            placeholder="Data dołączenia (YYYY-MM-DD)"
+            value={joinDate}
+            onChangeText={setJoinDate}
+          />
+
           <View style={styles.formButtons}>
             <View style={styles.buttonSpacing}>
               <Button title="Zapisz" onPress={handleAddOrUpdate} />
@@ -142,8 +196,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 8,
-    padding: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 12,
     marginBottom: 10,
+    backgroundColor: '#f9f9f9',
   },
   formButtons: {
     flexDirection: 'row',
@@ -154,7 +210,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   itemBox: { backgroundColor: '#f8f8f8', borderRadius: 8, padding: 14, marginBottom: 12 },
-  itemTitle: { fontSize: 18, fontWeight: 'bold', color: '#333', marginBottom: 8 },
   itemDetail: { fontSize: 16, color: '#555', marginBottom: 4 },
   buttonContainer: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 },
 });

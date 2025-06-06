@@ -5,29 +5,18 @@ const handleResponse = async (response) => {
     const errorText = await response.text();
     throw new Error(errorText || 'Wystąpił błąd');
   }
-
-  if (response.status === 204) {
-    return null;
-  }
-
-  return response.json();
+  if (response.status === 204) return null;
+  return await response.json();
 };
 
 // ---------- ACCOMMODATION ----------
 export const getAccommodations = async () => {
-  try {
-    const response = await fetch(`${BASE_URL}/Accommodation`);
-    const data = await handleResponse(response);
-    console.log('Odpowiedź z API:', data);
-
-    return data.map((item) => ({
-      ...item,
-      id: item.iDaccommodation,
-    }));
-  } catch (error) {
-    console.error('Błąd pobierania noclegów:', error);
-    throw error;
-  }
+  const response = await fetch(`${BASE_URL}/Accommodation`);
+  const data = await handleResponse(response);
+  return data.map(item => ({
+    ...item,
+    id: item.iDaccommodation,
+  }));
 };
 
 export const getAccommodationById = async (id) => {
@@ -85,10 +74,21 @@ export const deleteAccommodation = async (id) => {
 export const getUsers = async () => {
   const response = await fetch(`${BASE_URL}/User`);
   const data = await handleResponse(response);
-  return data.map(item => ({
-    ...item,
-    IDuser: item.iDuser?.toString()
-  }));
+
+  if (!Array.isArray(data)) {
+    console.error('Dane z backendu nie są tablicą:', data);
+    return [];
+  }
+
+return data.map(item => ({
+  IDuser: item.iDuser?.toString(),
+  firstName: item.firstName,  // 👈 MAŁĄ literą
+  lastName: item.lastName,    // 👈 MAŁĄ literą
+  phone: item.phone,
+  email: item.email,
+  address: item.address,
+  isActive: item.isActive,
+}));
 };
 
 export const createUser = async (user) => {
@@ -132,18 +132,12 @@ export const deleteUser = async (id) => {
 
 // ---------- BOOKING ----------
 export const getBookings = async () => {
-  try {
-    const response = await fetch(`${BASE_URL}/Booking`);
-    const data = await handleResponse(response);
-
-    return data.map(item => ({
-      ...item,
-      id: item.iDbooking,
-    }));
-  } catch (error) {
-    console.error('Błąd pobierania rezerwacji:', error);
-    throw error;
-  }
+  const response = await fetch(`${BASE_URL}/Booking`);
+  const data = await handleResponse(response);
+  return data.map(item => ({
+    ...item,
+    id: item.iDbooking,
+  }));
 };
 
 export const createBooking = async (booking) => {
@@ -184,13 +178,8 @@ export const deleteBooking = async (id) => {
 
 // ---------- PAYMENT ----------
 export const getPayments = async () => {
-  try {
-    const response = await fetch(`${BASE_URL}/Payment`);
-    return await handleResponse(response);
-  } catch (error) {
-    console.error('Błąd pobierania płatności:', error);
-    throw error;
-  }
+  const response = await fetch(`${BASE_URL}/Payment`);
+  return await handleResponse(response);
 };
 
 export const createPayment = async (payment) => {
@@ -249,19 +238,13 @@ export const deletePayment = async (id) => {
 
 // ---------- TEAM ----------
 export const getTeams = async () => {
-  try {
-    const response = await fetch(`${BASE_URL}/Team`);
-    const data = await handleResponse(response);
-
-    return data.map(team => ({
-      ...team,
-      IDteam: team.iDteam,
-      creationAt: team.createdAt,
-    }));
-  } catch (error) {
-    console.error('Błąd pobierania zespołów:', error);
-    throw error;
-  }
+  const response = await fetch(`${BASE_URL}/Team`);
+  const data = await handleResponse(response);
+  return data.map(item => ({
+    ...item,
+    IDteam: item.iDteam,
+    creationAt: item.createdAt,
+  }));
 };
 
 export const createTeam = async (team) => {
@@ -305,13 +288,17 @@ export const deleteTeam = async (id) => {
 
 // ---------- TEAM MEMBER ----------
 export const getTeamMembers = async () => {
-  try {
-    const response = await fetch(`${BASE_URL}/TeamMember`);
-    return await handleResponse(response);
-  } catch (error) {
-    console.error('Błąd pobierania członków zespołu:', error);
-    throw error;
-  }
+  const response = await fetch(`${BASE_URL}/TeamMember`);
+  const data = await handleResponse(response);
+  return data.map(item => ({
+    ...item,
+    IDteamMember: item.iDteamMember,
+    IDuser: item.iDuser,
+    IDteam: item.iDteam,
+    joinDate: item.joinDate,
+    User: item.user,
+    Team: item.team,
+  }));
 };
 
 export const createTeamMember = async (teamMember) => {
@@ -355,18 +342,15 @@ export const deleteTeamMember = async (id) => {
 
 // ---------- TRIP ----------
 export const getTrips = async () => {
-  try {
-    const response = await fetch(`${BASE_URL}/Trip`);
-    const data = await handleResponse(response);
-    return data.map(item => ({
-      ...item,
-      id: item.iDtrip,
-    }));
-  } catch (error) {
-    console.error('Błąd pobierania wyjazdów:', error);
-    throw error;
-  }
+  const response = await fetch(`${BASE_URL}/Trip`);
+  const data = await handleResponse(response);
+  return data.map(item => ({
+    ...item,
+    id: item.iDtrip,
+    TripName: item.tripName,
+  }));
 };
+
 export const createTrip = async (trip) => {
   try {
     const response = await fetch(`${BASE_URL}/Trip`, {
@@ -406,48 +390,56 @@ export const deleteTrip = async (id) => {
   }
 };
 
+
 // ---------- TRIP USER ----------
 export const getTripUsers = async () => {
-  try {
-    const response = await fetch(`${BASE_URL}/TripUser`);
-    return await handleResponse(response);
-  } catch (error) {
-    console.error('Błąd pobierania uczestników wyjazdów:', error);
-    throw error;
+  const response = await fetch(`${BASE_URL}/TripUser`);
+  const data = await handleResponse(response);
+
+  if (!Array.isArray(data)) {
+    console.error('Nieprawidłowe dane TripUser:', data);
+    return [];
   }
+
+  return data.map(item => ({
+    IDtripUser: item.iDtripUser?.toString(),
+    IDuser: item.iDuser?.toString(),
+    IDtrip: item.iDtrip?.toString(),
+    joinDate: item.joinDate,
+    User: item.user,
+    Trip: item.trip,
+  }));
 };
 
 export const createTripUser = async (tripUser) => {
-  try {
-    const response = await fetch(`${BASE_URL}/TripUser`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(tripUser),
-    });
-    return await handleResponse(response);
-  } catch (error) {
-    console.error('Błąd tworzenia uczestnika wyjazdu:', error);
-    throw error;
-  }
+  const response = await fetch(`${BASE_URL}/TripUser`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(tripUser), // 🔁 NIE opakowuj w { tripUser }
+  });
+  return await handleResponse(response);
 };
 
-export const updateTripUser = async (id, updatedTripUser) => {
+export const updateTripUser = async (id, tripUser) => {
   try {
     const response = await fetch(`${BASE_URL}/TripUser/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updatedTripUser),
+      body: JSON.stringify(tripUser),
     });
-    return await handleResponse(response);
+await handleResponse(response);
+    return True
   } catch (error) {
-    console.error('Błąd aktualizacji uczestnika wyjazdu:', error);
+    console.error(`Błąd aktualizacji uczestnika wyjazdu (ID: ${id}):`, error.message || error);
     throw error;
   }
 };
 
 export const deleteTripUser = async (id) => {
   try {
-    const response = await fetch(`${BASE_URL}/TripUser/${id}`, { method: 'DELETE' });
+    const response = await fetch(`${BASE_URL}/TripUser/${id}`, {
+      method: 'DELETE',
+    });
     await handleResponse(response);
     return true;
   } catch (error) {

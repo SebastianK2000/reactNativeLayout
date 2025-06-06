@@ -1,16 +1,39 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, View, Text, StyleSheet, Button, TextInput, Alert } from 'react-native';
-import { getTeamMembers, createTeamMember, updateTeamMember, deleteTeamMember } from '../../../../services/api';
+import { ScrollView, View, Text, StyleSheet, Button, Alert, TextInput } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
+import {
+  getTeamMembers,
+  createTeamMember,
+  updateTeamMember,
+  deleteTeamMember,
+  getUsers,
+  getTeams
+} from '../../../../services/api';
 
 const TeamMemberListScreen = () => {
+  interface User {
+    id: string;
+    firstName: string;
+    lastName: string;
+  }
+
+  interface Team {
+    id: string;
+    teamName: string;
+  }
+
   interface TeamMember {
     IDteamMember: string;
     IDuser: string;
     IDteam: string;
     joinDate: string;
+    User?: User;
+    Team?: Team;
   }
 
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
 
   const today = new Date().toISOString().split('T')[0];
@@ -24,7 +47,11 @@ const TeamMemberListScreen = () => {
     const fetchData = async () => {
       try {
         const members = await getTeamMembers();
+        const userList = await getUsers();
+        const teamList = await getTeams();
         setTeamMembers(members);
+        setUsers(userList);
+        setTeams(teamList);
       } catch (err) {
         console.error(err);
       }
@@ -55,11 +82,17 @@ const TeamMemberListScreen = () => {
     try {
       if (editingMember) {
         await updateTeamMember(editingMember.IDteamMember, payload);
-        setTeamMembers(teamMembers.map(m => (m.IDteamMember === editingMember.IDteamMember ? { ...payload, IDteamMember: editingMember.IDteamMember } : m)));
+        setTeamMembers(members =>
+          members.map(m =>
+            m.IDteamMember === editingMember.IDteamMember
+              ? { ...payload, IDteamMember: editingMember.IDteamMember }
+              : m
+          )
+        );
         Alert.alert('Zaktualizowano', 'Członek drużyny zaktualizowany.');
       } else {
         const created = await createTeamMember(payload);
-        setTeamMembers([...teamMembers, created]);
+        setTeamMembers(prev => [...prev, created]);
         Alert.alert('Dodano', 'Nowy członek dodany.');
       }
       resetForm();
@@ -72,7 +105,7 @@ const TeamMemberListScreen = () => {
   const handleDelete = async (id: string) => {
     try {
       await deleteTeamMember(id);
-      setTeamMembers(teamMembers.filter(m => m.IDteamMember !== id));
+      setTeamMembers(members => members.filter(m => m.IDteamMember !== id));
       Alert.alert('Usunięto', 'Członek drużyny został usunięty.');
     } catch (error) {
       console.error('Błąd usuwania:', error);
@@ -88,21 +121,26 @@ const TeamMemberListScreen = () => {
     setIsFormVisible(true);
   };
 
-  const renderMember = (member: TeamMember) => (
-    <View style={styles.itemBox} key={member.IDteamMember}>
-      <Text style={styles.itemTitle}>Member: {member.IDuser || 'Brak użytkownika'}</Text>
-      <Text style={styles.itemDetail}>👥 Team ID: {member.IDteam}</Text>
-      <Text style={styles.itemDetail}>📅 Joined: {member.joinDate?.split('T')[0]}</Text>
-      <View style={styles.buttonContainer}>
-        <View style={styles.buttonSpacing}>
-          <Button title="Edytuj" onPress={() => handleEdit(member)} />
-        </View>
-        <View style={styles.buttonSpacing}>
-          <Button title="Usuń" color="#d9534f" onPress={() => handleDelete(member.IDteamMember)} />
+  const renderMember = (member: TeamMember) => {
+    const user = users.find(u => u.id === member.IDuser);
+    const team = teams.find(t => t.id === member.IDteam);
+
+    return (
+      <View style={styles.itemBox} key={member.IDteamMember}>
+        <Text style={styles.itemTitle}>Member: {user?.lastName}</Text>
+        <Text style={styles.itemDetail}>👥 Team: {team?.teamName}</Text>
+        <Text style={styles.itemDetail}>📅 Joined: {member.joinDate?.split('T')[0]}</Text>
+        <View style={styles.buttonContainer}>
+          <View style={styles.buttonSpacing}>
+            <Button title="Edytuj" onPress={() => handleEdit(member)} />
+          </View>
+          <View style={styles.buttonSpacing}>
+            <Button title="Usuń" color="#d9534f" onPress={() => handleDelete(member.IDteamMember)} />
+          </View>
         </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -110,9 +148,29 @@ const TeamMemberListScreen = () => {
 
       {isFormVisible ? (
         <View style={styles.formContainer}>
-          <TextInput style={styles.input} placeholder="ID Użytkownika" value={IDuser} onChangeText={setIDuser} />
-          <TextInput style={styles.input} placeholder="ID Drużyny" value={IDteam} onChangeText={setIDteam} />
-          <TextInput style={styles.input} placeholder="Data dołączenia (YYYY-MM-DD)" value={joinDate} onChangeText={setJoinDate} />
+          <Text style={styles.itemDetail}>Wybierz użytkownika:</Text>
+          <Picker selectedValue={IDuser} onValueChange={(value) => setIDuser(value)}>
+            <Picker.Item label="-- wybierz --" value="" />
+            {users.map(user => (
+              <Picker.Item key={user.id} label={`${user.firstName} ${user.lastName}`} value={user.id} />
+            ))}
+          </Picker>
+
+          <Text style={styles.itemDetail}>Wybierz drużynę:</Text>
+          <Picker selectedValue={IDteam} onValueChange={(value) => setIDteam(value)}>
+            <Picker.Item label="-- wybierz --" value="" />
+            {teams.map(team => (
+              <Picker.Item key={team.id} label={team.teamName} value={team.id} />
+            ))}
+          </Picker>
+
+          <TextInput
+            style={styles.input}
+            placeholder="Data dołączenia (YYYY-MM-DD)"
+            value={joinDate}
+            onChangeText={setJoinDate}
+          />
+
           <View style={styles.formButtons}>
             <View style={styles.buttonSpacing}>
               <Button title="Zapisz" onPress={handleAddOrUpdate} />

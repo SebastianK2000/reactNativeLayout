@@ -1,116 +1,144 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Button } from 'react-native-paper';
-import { MaterialIcons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import React, { useEffect, useState } from 'react';
+import { ScrollView, View, Text, StyleSheet, Button } from 'react-native';
+import { getAccommodations, createAccommodation, updateAccommodation, deleteAccommodation } from '../../../services/api';
+import AccommodationForm from './(expenses)/AccommodationsForm';
 
-interface Expense {
-    description: string;
-    amount: number;
-    date: string;
-    category: string;
-    paymentMethod: string;
-    notes?: string;
-}
+const AccommodationListScreen = () => {
+  const [accommodations, setAccommodations] = useState<any[]>([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [editingAccommodation, setEditingAccommodation] = useState<any>(null);
 
-type OptionItemProps = {
-    label: string;
-    icon: keyof typeof MaterialIcons.glyphMap;
-    screen: string;
-};
+  useEffect(() => {
+    const fetchAccommodations = async () => {
+      try {
+        const acc = await getAccommodations();
+        setAccommodations(acc);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchAccommodations();
+  }, []);
 
-const Expenses: React.FC = () => {
-    const [showForm, setShowForm] = useState<boolean>(false);
-    const [expenses, setExpenses] = useState<Expense[]>([]);
-    const navigation = useNavigation<NativeStackNavigationProp<any>>();
+  const handleDeleteAccommodation = async (id?: string | number) => {
+    if (!id) {
+      console.error("Brak ID noclegu do usunięcia");
+      return;
+    }
 
-    const handleAddExpense = (expense: Expense) => {
-        setExpenses([...expenses, expense]);
-        setShowForm(false);
+    try {
+      await deleteAccommodation(id);
+      setAccommodations(accommodations.filter((item) => item.id !== id));
+    } catch (error) {
+      console.error("Błąd usuwania:", error);
+    }
+  };
+
+  const handleEditAccommodation = (accommodation: any) => {
+    setEditingAccommodation(accommodation);
+    setModalVisible(true);
+  };
+
+  const handleFormClose = () => {
+    setEditingAccommodation(null);
+    setModalVisible(false);
+  };
+
+const handleFormSubmit = async (formData: any) => {
+  try {
+    const payload = {
+      IDaccommodation: editingAccommodation?.id ?? 0,
+      Name: formData.name,
+      Type: formData.type,
+      Address: formData.address,
+      Price: parseFloat(formData.price),
+      CreatedAt: editingAccommodation?.createdAt || new Date().toISOString(),
+      UpdatedAt: new Date().toISOString(),
     };
 
-    return (
-        <View style={styles.container}>
-            {expenses.length === 0 ? (
-                <Text style={styles.noExpenses}>No expenses. Add a new expense!</Text>
-            ) : (
-                expenses.map((expense, index) => (
-                    <Text key={index} style={styles.expenseItem}>
-                        {expense.description} - {expense.amount} zł
-                    </Text>
-                ))
-            )}
+    if (editingAccommodation) {
+      const updated = await updateAccommodation(editingAccommodation.id, payload);
 
-            <OptionItem label="Add Expense" icon="add" screen="Expense" />
+      if (updated && updated.iDaccommodation !== undefined) {
+        setAccommodations(prev =>
+          prev.map(a =>
+            a.id === updated.iDaccommodation
+              ? { ...updated, id: updated.iDaccommodation }
+              : a
+          )
+        );
+      } else {
+        console.warn('Brak danych z updateAccommodation');
+      }
+    } else {
+      const created = await createAccommodation(payload);
+      setAccommodations(prev => [...prev, { ...created, id: created.iDaccommodation }]);
+    }
 
-            <TouchableOpacity
-                style={styles.fab}
-                onPress={() => navigation.navigate('Expense')}
-            >
-                <MaterialIcons name="add" size={24} color="white" />
-            </TouchableOpacity>
-
-            <OptionItem label="List Expense" icon="info" screen="ExpenseList" />
-            <OptionItem label="List Accommodation" icon="info" screen="AccommodationList" />
-
-        </View>
-    );
+    handleFormClose();
+  } catch (err) {
+    console.error('Błąd podczas zapisu:', err);
+  }
 };
 
-const OptionItem: React.FC<OptionItemProps> = ({ label, icon, screen }) => {
-    const navigation = useNavigation<NativeStackNavigationProp<any>>();
 
-    return (
-        <TouchableOpacity onPress={() => navigation.navigate(screen)} style={styles.optionItem}>
-            <MaterialIcons name={icon} size={24} color="#2563eb" />
-            <Text style={styles.optionLabel}>{label}</Text>
-        </TouchableOpacity>
-    );
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('pl-PL', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
+  const renderAccommodation = (item: any) => (
+    <View style={styles.itemBox} key={item.id}>
+      <Text style={styles.itemTitle}>{item.name || 'Brak nazwy'}</Text>
+      <Text style={styles.itemDetail}>📍 Adres: {item.address || 'Brak adresu'}</Text>
+      <Text style={styles.itemDetail}>🏠 Typ: {item.type || 'Brak typu'}</Text>
+      {item.price && <Text style={styles.itemDetail}>💰 Cena: {item.price} $</Text>}
+      {item.date && <Text style={styles.itemDetail}>📅 Data: {formatDate(item.date)}</Text>}
+      <Text style={styles.itemDetail}>👤 Stworzone przez: {item.createdBy}</Text>
+
+      <View style={styles.buttonContainer}>
+        <View style={styles.buttonSpacing}>
+          <Button title="Edytuj" onPress={() => handleEditAccommodation(item)} />
+        </View>
+        <View style={styles.buttonSpacing}>
+          <Button title="Usuń" color="#d9534f" onPress={() => handleDeleteAccommodation(item.id)} />
+        </View>
+      </View>
+    </View>
+  );
+
+  return (
+    <ScrollView style={styles.container}>
+      <Text style={styles.sectionTitle}>🏨 Zakwaterowania</Text>
+      <View style={styles.addButton}>
+        <Button title="Dodaj nowe zakwaterowanie" onPress={() => setModalVisible(true)} />
+      </View>
+      {accommodations.map(renderAccommodation)}
+      {modalVisible && (
+        <AccommodationForm
+          visible={modalVisible}
+          initialData={editingAccommodation}
+          onClose={handleFormClose}
+          onSubmit={handleFormSubmit}
+        />
+      )}
+    </ScrollView>
+  );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: 20,
-    },
-    noExpenses: {
-        fontSize: 18,
-        color: '#888',
-        marginBottom: 20,
-        textAlign: 'center',
-    },
-    expenseItem: {
-        fontSize: 16,
-        marginVertical: 10,
-        color: '#333',
-        textAlign: 'center',
-    },
-    fab: {
-        position: 'absolute',
-        right: 20,
-        bottom: 20,
-        backgroundColor: '#2563eb',
-        padding: 15,
-        borderRadius: 30,
-        shadowColor: 'rgba(0,0,0,0.2)',
-        shadowOffset: { width: 0, height: 4 },
-        shadowRadius: 6,
-        shadowOpacity: 0.3,
-    },
-    optionItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 20,
-        marginBottom: 10,
-    },
-    optionLabel: {
-        marginLeft: 10,
-        fontSize: 16,
-        color: '#2563eb',
-    },
+  container: { flex: 1, backgroundColor: '#fff', padding: 16 },
+  sectionTitle: { fontSize: 22, fontWeight: 'bold', marginTop: 20, marginBottom: 10, color: '#333' },
+  addButton: { marginBottom: 20 },
+  itemBox: { backgroundColor: '#f8f8f8', borderRadius: 8, padding: 14, marginBottom: 12 },
+  itemTitle: { fontSize: 18, fontWeight: 'bold', color: '#333', marginBottom: 8 },
+  itemDetail: { fontSize: 16, color: '#555', marginBottom: 4 },
+  buttonContainer: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 },
+  buttonSpacing: { flex: 1, marginHorizontal: 5 },
 });
 
-export default Expenses;
+export default AccommodationListScreen;

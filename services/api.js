@@ -80,16 +80,16 @@ export const getUsers = async () => {
     return [];
   }
 
-return data.map(item => ({
-  IDuser: item.iDuser?.toString(),
-  firstName: item.firstName,  // 👈 MAŁĄ literą
-  lastName: item.lastName,    // 👈 MAŁĄ literą
-  phone: item.phone,
-  email: item.email,
-  address: item.address,
-  isActive: item.isActive,
-}));
-};
+  return data.map(item => ({
+    iDuser: item.iDuser?.toString(),
+    firstName: item.firstName,
+    lastName: item.lastName,
+    phone: item.phone,
+    email: item.email,
+    address: item.address,
+    isActive: item.isActive,
+  }));
+  };
 
 export const createUser = async (user) => {
   try {

@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Modal, View, TextInput, Button, StyleSheet, Text } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
+import { getUsers } from '../../../../services/api';
 
 export interface BookingFormProps {
   visible: any;
@@ -20,25 +22,30 @@ const BookingForm = ({ visible, onClose, onSubmit, initialData }: BookingFormPro
     status: '',
   });
 
+  const [users, setUsers] = useState<any[]>([]);
+
   useEffect(() => {
-    if (initialData) {
-      setForm({
-        IDuser: initialData.IDuser || '',
-        bookingDate: initialData.bookingDate || today,
-        IDaccommodation: initialData.IDaccommodation || '',
-        totalPrice: initialData.totalPrice?.toString() || '',
-        status: initialData.status || '',
-      });
-    } else {
-      setForm({
-        IDuser: '',
-        bookingDate: today,
-        IDaccommodation: '',
-        totalPrice: '',
-        status: '',
-      });
-    }
-  }, [initialData]);
+    const fetchUsers = async () => {
+      try {
+        const data = await getUsers();
+        setUsers(data);
+      } catch (error) {
+        console.error('Błąd pobierania użytkowników:', error);
+      }
+    };
+    fetchUsers();
+  }, []);
+
+useEffect(() => {
+  setForm({
+    IDuser: initialData?.iDuser?.toString() || '',
+    bookingDate: initialData?.bookingDate || today,
+    IDaccommodation: initialData?.iDaccommodation?.toString() || '',
+    totalPrice: initialData?.totalPrice?.toString() || '',
+    status: initialData?.status || '',
+  });
+}, [initialData]);
+
 
   const handleChange = (field: string, value: string) => {
     setForm({ ...form, [field]: value });
@@ -52,6 +59,8 @@ const BookingForm = ({ visible, onClose, onSubmit, initialData }: BookingFormPro
 
     onSubmit({
       ...form,
+      IDuser: parseInt(form.IDuser, 10),
+      IDaccommodation: parseInt(form.IDaccommodation, 10),
       totalPrice: parseFloat(form.totalPrice),
       status: form.status || 'New',
     });
@@ -63,12 +72,23 @@ const BookingForm = ({ visible, onClose, onSubmit, initialData }: BookingFormPro
     <Modal visible={visible} animationType="slide">
       <View style={styles.container}>
         <Text style={styles.title}>{initialData ? 'Edit Booking' : 'Add New Booking'}</Text>
-        <TextInput
-          placeholder="User ID"
-          style={styles.input}
-          value={form.IDuser}
-          onChangeText={(val) => handleChange('IDuser', val)}
-        />
+
+        <Text style={styles.label}>Użytkownik:</Text>
+        <Picker
+          selectedValue={form.IDuser}
+          onValueChange={(val) => handleChange('IDuser', val)}
+          style={styles.picker}
+        >
+          <Picker.Item label="-- Wybierz użytkownika --" value="" />
+          {users.map((user) => (
+            <Picker.Item
+              key={user.id}
+              label={`${user.firstName} ${user.lastName}`}
+              value={user.id.toString()}
+            />
+          ))}
+        </Picker>
+
         <TextInput
           placeholder="Booking Date (YYYY-MM-DD)"
           style={styles.input}
@@ -94,6 +114,7 @@ const BookingForm = ({ visible, onClose, onSubmit, initialData }: BookingFormPro
           value={form.status}
           onChangeText={(val) => handleChange('status', val)}
         />
+
         <View style={styles.buttonGroup}>
           <Button title="Cancel" onPress={onClose} color="grey" />
           <Button title="Save" onPress={handleSubmit} />
@@ -116,11 +137,18 @@ const styles = StyleSheet.create({
     padding: 8,
     fontSize: 16,
   },
+  picker: {
+    marginBottom: 16,
+  },
   title: {
     fontSize: 22,
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 4,
   },
   buttonGroup: {
     marginTop: 20,

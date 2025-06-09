@@ -50,7 +50,11 @@ const TeamMemberListScreen = () => {
         const userList = await getUsers();
         const teamList = await getTeams();
         setTeamMembers(members);
-        setUsers(userList);
+        setUsers(userList.map((u: any) => ({
+          id: u.iDuser,
+          firstName: u.firstName,
+          lastName: u.lastName
+        })));
         setTeams(teamList);
       } catch (err) {
         console.error(err);

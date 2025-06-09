@@ -6,12 +6,12 @@ import UserForm from './userForm';
 const UserListScreen = () => {
   interface User {
     IDuser: string;
-    FirstName?: string;
-    LastName?: string;
-    Phone?: string;
-    Email?: string;
-    Address?: string;
-    IsActive?: boolean;
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    email?: string;
+    address?: string;
+    isActive?: boolean;
   }
 
   const [users, setUsers] = useState<User[]>([]);
@@ -22,7 +22,17 @@ const UserListScreen = () => {
     const fetchUsers = async () => {
       try {
         const userData = await getUsers();
-        setUsers(userData);
+        setUsers(
+          userData.map((u: any) => ({
+            IDuser: u.iDuser,
+            firstName: u.firstName,
+            lastName: u.lastName,
+            phone: u.phone,
+            email: u.email,
+            address: u.address,
+            isActive: u.isActive,
+          }))
+        );
       } catch (err) {
         console.error(err);
       }
@@ -71,13 +81,13 @@ const UserListScreen = () => {
 
   const renderUser = (item: User) => (
     <View key={item.IDuser} style={styles.itemBox}>
-      <Text style={styles.itemTitle}>User: {(item.FirstName || '') + ' ' + (item.LastName || '')}</Text>
-      <Text style={styles.itemDetail}>👤 First Name: {item.FirstName || 'No First Name'}</Text>
-      <Text style={styles.itemDetail}>👤 Last Name: {item.LastName || 'No Last Name'}</Text>
-      <Text style={styles.itemDetail}>📞 Phone: {item.Phone || 'No Phone'}</Text>
-      <Text style={styles.itemDetail}>📧 Email: {item.Email || 'No E-mail'}</Text>
-      <Text style={styles.itemDetail}>🏠 Address: {item.Address || 'No Address'}</Text>
-      <Text style={styles.itemDetail}>{item.IsActive ? '✅ Active' : '❌ Inactive'}</Text>
+      <Text style={styles.itemTitle}>User: {(item.firstName || '') + ' ' + (item.lastName || '')}</Text>
+      <Text style={styles.itemDetail}>👤 First Name: {item.firstName || 'No First Name'}</Text>
+      <Text style={styles.itemDetail}>👤 Last Name: {item.lastName || 'No Last Name'}</Text>
+      <Text style={styles.itemDetail}>📞 Phone: {item.phone || 'No Phone'}</Text>
+      <Text style={styles.itemDetail}>📧 Email: {item.email || 'No E-mail'}</Text>
+      <Text style={styles.itemDetail}>🏠 Address: {item.address || 'No Address'}</Text>
+      <Text style={styles.itemDetail}>{item.isActive ? '✅ Active' : '❌ Inactive'}</Text>
 
       <View style={styles.buttonContainer}>
         <View style={styles.buttonSpacing}>

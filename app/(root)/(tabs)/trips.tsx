@@ -15,8 +15,14 @@ type OptionItemProps = {
     screen: string;
 };
 
+type Trip = {
+    id: string;
+    teamName: string;
+    destination: string;
+};
+
 const Trips: React.FC = () => {
-    const [trips, setTrips] = useState([]);
+    const [trips, setTrips] = useState<Trip[]>([]);
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
     const handleCreateTeam = () => {
@@ -77,6 +83,18 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginBottom: 20,
     },
+    tripCard: {
+        backgroundColor: '#fff',
+        padding: 16,
+        borderRadius: 10,
+        marginVertical: 8,
+        width: '100%',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2,
+    },
     fab: {
         position: 'absolute',
         right: 20,
@@ -99,6 +117,12 @@ const styles = StyleSheet.create({
         marginLeft: 10,
         fontSize: 16,
         color: '#2563eb',
+    },
+    tripTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#222',
+        marginBottom: 4,
     },
 });
 

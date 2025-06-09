@@ -41,7 +41,11 @@ useEffect(() => {
       const [tu, us, ts] = await Promise.all([getTripUsers(), getUsers(), getTrips()]);
       console.log('TripUsers z API:', tu);
       setTripUsers(tu);
-      setUsers(us);
+      setUsers(us.map((u: any) => ({
+        IDuser: u.iDuser,
+        firstName: u.firstName,
+        lastName: u.lastName,
+      })));
       setTrips(ts);
     } catch (err) {
       console.error('Błąd ładowania danych:', err);
@@ -73,7 +77,7 @@ const payload = {
   IDtripUser: editingUser?.IDtripUser ?? '0',
   IDuser: parsedIDuser,
   IDtrip: parsedIDtrip,
-  joinDate: new Date(joinDate).toISOString(), // ✅ z małej litery
+  joinDate: new Date(joinDate).toISOString(),
 };
 
   try {
@@ -89,7 +93,7 @@ const payload = {
       setTripUsers(prev => [...prev, created]);
     }
 
-    resetForm(); // ✅ reset wewnątrz try, po udanym zapisie
+    resetForm();
   } catch (error: any) {
     console.error('Błąd zapisu:', error.message || error);
     Alert.alert('Błąd', 'Nie udało się zapisać danych.');
@@ -116,7 +120,7 @@ const payload = {
   };
 
   const renderUser = (user: TripUser) => (
-      console.log('Render user item:', user), // 👈 dodaj to
+      console.log('Render user item:', user),
     <View style={styles.itemBox} key={user.IDtripUser}>
     <Text>User: {user.User?.firstName} {user.User?.lastName}</Text>
     <Text>Trip: {user.Trip?.tripName}</Text>

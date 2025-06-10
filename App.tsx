@@ -23,7 +23,6 @@ import TripList from "./app/(root)/(tabs)/(trips)/tripsListScreen";
 import BookingList from "./app/(root)/(tabs)/(booking)/bookingListScreen";
 import TeamList from "./app/(root)/(tabs)/(home)/teamListScreen";
 import UserList from "./app/(root)/(tabs)/(booking)/userListScreen";
-import AccommodationList from "./app/(root)/(tabs)/(expenses)/AccommodationsListScreen";
 import TeamMemberList from "./app/(root)/(tabs)/(home)/TeamMemberListScreen";
 import TripUserList from "./app/(root)/(tabs)/(trips)/tripUserListScreen";
 
@@ -130,7 +129,6 @@ export default function App() {
                 <Stack.Screen name="TripList" component={TripList} />
                 <Stack.Screen name="BookingList" component={BookingList} />
                 <Stack.Screen name="TeamList" component={TeamList} />
-                <Stack.Screen name="AccommodationList" component={AccommodationList} />
                 <Stack.Screen name="TeamMemberList" component={TeamMemberList} />
                 <Stack.Screen name="TripUserList" component={TripUserList} />
 
